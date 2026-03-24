@@ -94,7 +94,8 @@ add_action( 'init', 'dd_gp_register_addon_blocks' );
 
 /**
  * Renders the frontend output for the Lightbox Container dynamic Gutenberg block.
- * Resolves dynamic data (Post Meta) or executes shortcodes to generate the media URL.
+ * Resolves dynamic data (Post Meta) or executes shortcodes to generate the media URL,
+ * and conditionally injects a play button overlay based on block attributes.
  *
  * @param array  $attributes Block attributes from the editor.
  * @param string $content    The saved InnerBlocks HTML content.
@@ -129,7 +130,14 @@ function dd_render_lightbox_container_block( $attributes, $content ) {
     ob_start();
     ?>
     <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-        <?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+        <?php 
+        // Inject the play button overlay if enabled in the block settings
+        if ( ! empty( $attributes['showPlayButton'] ) ) {
+            echo '<div class="dd-lightbox-play-button"></div>';
+        }
+        
+        echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+        ?>
     </div>
     <?php
     return ob_get_clean();

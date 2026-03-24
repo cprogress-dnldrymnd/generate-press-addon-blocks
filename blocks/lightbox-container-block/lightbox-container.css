@@ -121,6 +121,7 @@
 }
 
 /* Styling for the centered play button */
+/* Styling for the centered play button */
 .dd-lightbox-play-button {
     position: absolute;
     top: 50%;
@@ -137,6 +138,7 @@
     align-items: center;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     transition: background-color 0.2s ease, transform 0.2s ease;
+    color: #333; /* Base color for the SVG fill */
 }
 
 .dd-lightbox-play-button:hover {
@@ -144,13 +146,10 @@
     transform: translate(-50%, -50%) scale(1.1);
 }
 
-.dd-lightbox-play-button::before {
-    content: '';
-    display: block;
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-bottom: 15px solid transparent;
-    border-left: 25px solid #333;
-    margin-left: 10px;
+/* Inline SVG styling with optical centering */
+.dd-lightbox-play-button svg {
+    width: 28px;
+    height: 28px;
+    margin-left: 4px; /* Optically centers the asymmetrical play triangle */
+    transition: transform 0.2s ease;
 }

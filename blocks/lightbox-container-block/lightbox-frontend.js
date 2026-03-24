@@ -1,6 +1,7 @@
 /**
  * Handles the frontend interaction and media routing for the Lightbox Container.
- * Detects the URL type and dynamically generates the required media node inside the modal.
+ * Detects the URL type, generates the media node inside the modal, and manages
+ * the lifecycle of the HTML5 dialog, including entrance/exit animations.
  */
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -31,10 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Creates or retrieves the singleton <dialog> element for the lightbox.
+     * Hooks into CSS animations to ensure smooth transitions before unmounting content.
      * * @return {HTMLDialogElement} The dialog node.
      */
     const getOrCreateDialog = () => {
         let dialog = document.getElementById('dd-global-media-lightbox');
+        
         if (!dialog) {
             dialog = document.createElement('dialog');
             dialog.id = 'dd-global-media-lightbox';
@@ -52,9 +55,20 @@ document.addEventListener('DOMContentLoaded', () => {
             dialog.appendChild(contentWrapper);
             document.body.appendChild(dialog);
 
+            /**
+             * Triggers the exit animation, waits for completion, then removes the dialog.
+             */
             const closeLightbox = () => {
-                contentWrapper.innerHTML = ''; // Clear media to stop video playback
-                dialog.close();
+                // Apply the CSS class that triggers the exit animation keyframes
+                dialog.classList.add('dd-lightbox-closing');
+                
+                // Wait for the animation to finish before destroying content and closing native dialog
+                dialog.addEventListener('animationend', function handleAnimationEnd() {
+                    dialog.classList.remove('dd-lightbox-closing');
+                    contentWrapper.innerHTML = ''; // Clear media to stop video playback
+                    dialog.close();
+                    dialog.removeEventListener('animationend', handleAnimationEnd); // Cleanup listener
+                }, { once: true });
             };
 
             closeBtn.addEventListener('click', closeLightbox);
@@ -65,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return dialog;
     };
 
+    // Initialize all lightbox triggers on the page
     const triggers = document.querySelectorAll('.dd-lightbox-trigger-container');
 
     triggers.forEach(container => {
@@ -107,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 wrapper.appendChild(ratioWrapper);
             }
 
+            // Native HTML5 dialog method to open with backdrop
             dialog.showModal();
         });
     });

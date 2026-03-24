@@ -1,7 +1,8 @@
 /**
  * Registers the 'dd/lightbox-container' block.
  * Provides a structural wrapper with InnerBlocks for layout design.
- * Now acts as a Dynamic Block, passing attributes to PHP for server-side dynamic URL resolution.
+ * Now acts as a Dynamic Block, passing attributes to PHP for server-side dynamic URL resolution
+ * and optional play button rendering.
  */
 ( function( wp ) {
     const { registerBlockType } = wp.blocks;
@@ -26,12 +27,16 @@
             metaKey: {
                 type: 'string',
                 default: ''
+            },
+            showPlayButton: {
+                type: 'boolean',
+                default: false
             }
         },
         
         /**
          * Renders the editor interface.
-         * Outputs InspectorControls for dynamic routing and InnerBlocks for the visual design.
+         * Outputs InspectorControls for dynamic routing, play button toggle, and InnerBlocks for visual design.
          *
          * @param {Object} props Block properties and attributes.
          * @return {Object} The rendered React element.
@@ -46,7 +51,13 @@
 
             return el( wp.element.Fragment, null,
                 el( InspectorControls, null,
-                    el( PanelBody, { title: 'Lightbox Media Source', initialOpen: true },
+                    el( PanelBody, { title: 'Lightbox Settings', initialOpen: true },
+                        el( ToggleControl, {
+                            label: 'Show Play Button Overlay',
+                            checked: attributes.showPlayButton,
+                            onChange: ( val ) => setAttributes( { showPlayButton: val } ),
+                            help: 'Displays a centered play icon over the container.'
+                        } ),
                         el( ToggleControl, {
                             label: 'Use Dynamic Data (Post Meta)',
                             checked: attributes.isDynamic,
@@ -74,6 +85,12 @@
                 el( 'div', blockProps,
                     // Editor visual indicator
                     el( 'div', { style: { position: 'absolute', top: '-10px', left: '10px', background: '#007cba', color: '#fff', padding: '2px 8px', fontSize: '11px', borderRadius: '3px', zIndex: 10 } }, 'Lightbox Container (Dynamic)' ),
+                    
+                    // Render a visual placeholder for the play button in the editor if enabled
+                    attributes.showPlayButton ? 
+                        el( 'div', { className: 'dd-lightbox-play-button', style: { pointerEvents: 'none' } } ) 
+                    : null,
+
                     el( InnerBlocks, {
                         renderAppender: InnerBlocks.ButtonBlockAppender
                     } )
@@ -83,7 +100,7 @@
 
         /**
          * Saves the structural layout of the InnerBlocks.
-         * The wrapper and dynamic 'data-lightbox-url' are now generated via the PHP render_callback.
+         * The wrapper, dynamic 'data-lightbox-url', and play button are generated via the PHP render_callback.
          *
          * @param {Object} props Block properties and attributes.
          * @return {Object} The rendered React element for the database.
