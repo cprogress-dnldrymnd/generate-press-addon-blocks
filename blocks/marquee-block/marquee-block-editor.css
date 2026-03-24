@@ -1,0 +1,33 @@
+/**
+ * Editor-only styles for the Logo Marquee block.
+ * Targets Gutenberg's injected InnerBlocks wrappers to force horizontal layout.
+ */
+
+/* Override the default vertical stacking of Gutenberg's InnerBlocks wrapper */
+.wp-block-dd-logo-marquee > .block-editor-inner-blocks > .block-editor-block-list__layout {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    align-items: center;
+    gap: 40px;
+    padding: 20px;
+    border: 2px dashed #ccc;
+}
+
+/* Prevent image blocks from squishing and remove default margins */
+.wp-block-dd-logo-marquee .wp-block-image {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; 
+}
+
+/* Enforce uniform height matching the frontend output */
+.wp-block-dd-logo-marquee .wp-block-image img {
+    height: 35px;
+    width: auto;
+    max-width: none;
+    object-fit: contain;
+    display: block;
+}

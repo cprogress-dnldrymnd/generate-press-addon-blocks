@@ -1,0 +1,156 @@
+/**
+ * Styling for the Lightbox Container and its native HTML5 Modal.
+ * Includes responsive scaling, aspect ratio wrappers, and smooth entrance/exit animations.
+ */
+
+.dd-lightbox-trigger-container {
+    position: relative; 
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.dd-lightbox-trigger-container:hover {
+    opacity: 0.9;
+}
+
+/* Base dialog styling */
+.dd-media-lightbox-modal {
+    padding: 0;
+    border: none;
+    background: transparent;
+    max-width: 1200px;
+    width: 90vw;
+    max-height: 90vh;
+    overflow: visible;
+}
+
+.dd-media-lightbox-modal::backdrop {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+}
+
+/* --- Smooth Animation Logic --- */
+
+/* 1. Entrance Animation */
+.dd-media-lightbox-modal[open] {
+    animation: dd-lightbox-fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dd-media-lightbox-modal[open]::backdrop {
+    animation: dd-backdrop-fade-in 0.3s ease-out forwards;
+}
+
+/* 2. Exit Animation (Triggered via JS class) */
+.dd-media-lightbox-modal.dd-lightbox-closing {
+    animation: dd-lightbox-fade-out 0.25s cubic-bezier(0.5, 0, 0.1, 1) forwards;
+}
+
+.dd-media-lightbox-modal.dd-lightbox-closing::backdrop {
+    animation: dd-backdrop-fade-out 0.25s ease-in forwards;
+}
+
+@keyframes dd-lightbox-fade-in {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes dd-lightbox-fade-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(10px) scale(0.97); }
+}
+
+@keyframes dd-backdrop-fade-in {
+    from { opacity: 0; backdrop-filter: blur(0px); }
+    to { opacity: 1; backdrop-filter: blur(5px); }
+}
+
+@keyframes dd-backdrop-fade-out {
+    from { opacity: 1; backdrop-filter: blur(5px); }
+    to { opacity: 0; backdrop-filter: blur(0px); }
+}
+
+/* --- End Animation Logic --- */
+
+.dd-lightbox-content-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dd-lightbox-content-wrapper img,
+.dd-lightbox-content-wrapper video {
+    max-width: 100%;
+    max-height: 85vh;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+/* 16:9 Aspect Ratio for YouTube/Vimeo */
+.dd-responsive-iframe-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.dd-responsive-iframe-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.dd-lightbox-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: transparent;
+    color: #fff;
+    border: none;
+    font-size: 2.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    z-index: 10;
+}
+
+/* Styling for the centered play button */
+.dd-lightbox-play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.dd-lightbox-play-button:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.dd-lightbox-play-button::before {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-left: 25px solid #333;
+    margin-left: 10px;
+}
