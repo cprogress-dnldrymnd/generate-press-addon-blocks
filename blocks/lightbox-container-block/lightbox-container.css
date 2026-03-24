@@ -6,6 +6,7 @@
 .dd-lightbox-trigger-container {
     position: relative; 
     transition: transform 0.2s ease, opacity 0.2s ease;
+    height: 100%;
 }
 
 .dd-lightbox-trigger-container:hover {
