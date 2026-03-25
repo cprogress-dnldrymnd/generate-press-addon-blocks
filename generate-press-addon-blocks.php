@@ -165,3 +165,8 @@ function dd_render_marquee_block( $attributes, $content ) {
     <?php
     return ob_get_clean();
 }
+
+function test() {
+    return 'https://thinklaser.theprogressteam.com/wp-content/uploads/2026/03/stock-photo-laser-cutting-machine-in-industrial-factory-producing-precision-metal-parts-2643491785@2x-600x410.png';
+}   
+add_shortcode('test', 'test');
