@@ -1,6 +1,6 @@
 /**
  * Registers the 'dd/logo-marquee' block for the Gutenberg Editor.
- * Enforces an InnerBlocks structure that only accepts 'core/image' blocks.
+ * Enforces an InnerBlocks structure that accepts 'core/image', 'core/paragraph', and 'core/heading' blocks.
  */
 ( function( wp ) {
     const { registerBlockType } = wp.blocks;
@@ -11,7 +11,7 @@
         title: 'Logo Marquee (Infinite)',
         icon: 'images-alt2',
         category: 'design',
-        description: 'Add an infinitely scrolling row of logos.',
+        description: 'Add an infinitely scrolling row of logos or text.',
         
         /**
          * Renders the editor interface. 
@@ -23,7 +23,8 @@
 
             return el( 'div', blockProps,
                 el( InnerBlocks, {
-                    allowedBlocks: [ 'core/image' ],
+                    // Added core/paragraph and core/heading to support text entries
+                    allowedBlocks: [ 'core/image', 'core/paragraph', 'core/heading' ],
                     orientation: 'horizontal',
                     renderAppender: InnerBlocks.ButtonBlockAppender
                 } )
