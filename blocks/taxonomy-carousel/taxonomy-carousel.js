@@ -1,6 +1,7 @@
 /**
  * Registers the 'dd/taxonomy-carousel' block.
  * Provides a dynamic interface to query taxonomies and configure Swiper.js slide parameters.
+ * Includes responsive controls for slide visibility across breakpoints.
  */
 ( function( wp ) {
     const { registerBlockType } = wp.blocks;
@@ -22,6 +23,8 @@
             displayDescription: { type: 'boolean', default: false },
             metaKey: { type: 'string', default: '' },
             slidesPerView: { type: 'number', default: 3 },
+            slidesPerViewTablet: { type: 'number', default: 2 },
+            slidesPerViewMobile: { type: 'number', default: 1 },
             spaceBetween: { type: 'number', default: 20 },
             autoplay: { type: 'boolean', default: false },
             loop: { type: 'boolean', default: true },
@@ -88,10 +91,22 @@
                     ),
                     el( PanelBody, { title: 'Swiper Settings', initialOpen: false },
                         el( RangeControl, {
-                            label: 'Slides Per View',
+                            label: 'Slides Per View (Desktop)',
                             value: attributes.slidesPerView,
                             onChange: ( val ) => setAttributes( { slidesPerView: val } ),
                             min: 1, max: 6
+                        } ),
+                        el( RangeControl, {
+                            label: 'Slides Per View (Tablet)',
+                            value: attributes.slidesPerViewTablet,
+                            onChange: ( val ) => setAttributes( { slidesPerViewTablet: val } ),
+                            min: 1, max: 6
+                        } ),
+                        el( RangeControl, {
+                            label: 'Slides Per View (Mobile)',
+                            value: attributes.slidesPerViewMobile,
+                            onChange: ( val ) => setAttributes( { slidesPerViewMobile: val } ),
+                            min: 1, max: 4
                         } ),
                         el( RangeControl, {
                             label: 'Space Between (px)',

@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     carousels.forEach( ( carouselEl ) => {
         // Parse configurations compiled from Gutenberg block attributes
         const slidesPerView = parseInt( carouselEl.dataset.slidesPerView, 10 ) || 3;
+        const slidesPerViewTablet = parseInt( carouselEl.dataset.slidesPerViewTablet, 10 ) || 2;
+        const slidesPerViewMobile = parseInt( carouselEl.dataset.slidesPerViewMobile, 10 ) || 1;
         const spaceBetween = parseInt( carouselEl.dataset.spaceBetween, 10 ) || 20;
         const isAutoplay = carouselEl.dataset.autoplay === 'true';
         const isLoop = carouselEl.dataset.loop === 'true';
@@ -23,10 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
             spaceBetween: spaceBetween,
             loop: isLoop,
             
-            // Responsive breakpoints (Graceful degradation for mobile)
+            // Map the responsive settings parsed from the block settings
             breakpoints: {
-                320: { slidesPerView: 1, spaceBetween: 10 },
-                768: { slidesPerView: Math.min(2, slidesPerView), spaceBetween: 15 },
+                320: { slidesPerView: slidesPerViewMobile, spaceBetween: Math.min(10, spaceBetween) },
+                768: { slidesPerView: slidesPerViewTablet, spaceBetween: Math.min(15, spaceBetween) },
                 1024: { slidesPerView: slidesPerView, spaceBetween: spaceBetween }
             }
         };

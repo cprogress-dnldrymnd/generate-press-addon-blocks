@@ -12,7 +12,7 @@
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
-define('GeneratePress_Addon_Version', '2.1.7');
+define('GeneratePress_Addon_Version', '2.1.8');
 /**
  * Centralized block registry for Generate Press Add-on Blocks.
  * Iterates through a configuration array to dynamically register block scripts, styles, and behaviors.
@@ -108,18 +108,20 @@ add_action('init', 'dd_gp_register_addon_blocks');
 function dd_render_taxonomy_carousel_block($attributes, $content)
 {
     $defaults = array(
-        'taxonomy'           => 'category',
-        'showEmpty'          => false,
-        'excludeTerms'       => '',
-        'displayName'        => true,
-        'displayDescription' => false,
-        'metaKey'            => '',
-        'slidesPerView'      => 3,
-        'spaceBetween'       => 20,
-        'autoplay'           => false,
-        'loop'               => true,
-        'pagination'         => true,
-        'navigation'         => false,
+        'taxonomy'            => 'category',
+        'showEmpty'           => false,
+        'excludeTerms'        => '',
+        'displayName'         => true,
+        'displayDescription'  => false,
+        'metaKey'             => '',
+        'slidesPerView'       => 3,
+        'slidesPerViewTablet' => 2,
+        'slidesPerViewMobile' => 1,
+        'spaceBetween'        => 20,
+        'autoplay'            => false,
+        'loop'                => true,
+        'pagination'          => true,
+        'navigation'          => false,
     );
     $attributes = wp_parse_args($attributes, $defaults);
 
@@ -133,7 +135,7 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
 
     $terms = get_terms(array(
         'taxonomy'   => $taxonomy,
-        'hide_empty' => ! $attributes['showEmpty'], // Inverts logic: if showEmpty is true, hide_empty becomes false
+        'hide_empty' => ! $attributes['showEmpty'], 
         'exclude'    => $exclude_ids,
     ));
 
@@ -142,20 +144,21 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
     }
 
     $wrapper_attributes = get_block_wrapper_attributes(array(
-        'class'                => 'dd-taxonomy-carousel swiper',
-        'data-slides-per-view' => esc_attr($attributes['slidesPerView']),
-        'data-space-between'   => esc_attr($attributes['spaceBetween']),
-        'data-autoplay'        => esc_attr($attributes['autoplay'] ? 'true' : 'false'),
-        'data-loop'            => esc_attr($attributes['loop'] ? 'true' : 'false'),
-        'data-pagination'      => esc_attr($attributes['pagination'] ? 'true' : 'false'),
-        'data-navigation'      => esc_attr($attributes['navigation'] ? 'true' : 'false'),
+        'class'                       => 'dd-taxonomy-carousel swiper',
+        'data-slides-per-view'        => esc_attr($attributes['slidesPerView']),
+        'data-slides-per-view-tablet' => esc_attr($attributes['slidesPerViewTablet']),
+        'data-slides-per-view-mobile' => esc_attr($attributes['slidesPerViewMobile']),
+        'data-space-between'          => esc_attr($attributes['spaceBetween']),
+        'data-autoplay'               => esc_attr($attributes['autoplay'] ? 'true' : 'false'),
+        'data-loop'                   => esc_attr($attributes['loop'] ? 'true' : 'false'),
+        'data-pagination'             => esc_attr($attributes['pagination'] ? 'true' : 'false'),
+        'data-navigation'             => esc_attr($attributes['navigation'] ? 'true' : 'false'),
     ));
 
     ob_start();
 ?>
     <div class="swiper-holder">
-        <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-                ?>>
+        <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
             <div class="swiper-wrapper">
                 <?php foreach ($terms as $term) : ?>
                     <div class="swiper-slide dd-term-slide">
@@ -194,7 +197,7 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
                 <div class="swiper-pagination"></div>
             <?php endif; ?>
         </div>
-
+        
         <?php if ($attributes['navigation']) : ?>
             <button class="gb-carousel-control gbp-carousel-controls gbp-carousel-controls__button gbp-carousel--control__previous gb-carousel-control--previous">
                 <span class="gb-carousel-control-icon">
@@ -215,7 +218,6 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
 <?php
     return ob_get_clean();
 }
-
 /**
  * Renders the frontend output for the Lightbox Container dynamic Gutenberg block.
  * Resolves dynamic data (Post Meta) or executes shortcodes to generate the media URL,
