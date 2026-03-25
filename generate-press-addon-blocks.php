@@ -185,7 +185,6 @@ function dd_render_marquee_block( $attributes, $content ) {
  */
 function term_image( $atts ) {
     // Parse attributes with strictly defined defaults
-    return 'test';
     $atts = shortcode_atts(
         array(
             'meta_key' => 'thumbnail_id',
@@ -218,7 +217,7 @@ function term_image( $atts ) {
 
     // Bail if no meta value is present.
     if ( empty( $attachment_id ) ) {
-        return '';
+        return 'x2';
     }
 
     // Retrieve the image URL based on the attachment ID and requested size parameters.
