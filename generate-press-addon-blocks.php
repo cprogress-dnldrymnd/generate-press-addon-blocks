@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Generate Press Add-on Blocks
  * Description: A scalable collection of custom, performance-optimized Gutenberg blocks and extensions for GeneratePress.
- * Version: 1.8.0
+ * Version: 1.8.1
  * Author: Digitally Disruptive - Donald Raymundo
  * Author URI: https://digitallydisruptive.co.uk/
  * Text Domain: dd-gp-addon-blocks
@@ -57,7 +57,7 @@ function dd_gp_register_addon_blocks()
         $view_script_handle  = "dd-{$slug}-view-script";
 
         $block_args = array(
-            'api_version'   => 2.2,
+            'api_version'   => 2,
         );
 
         // Register and assign the Editor Script
