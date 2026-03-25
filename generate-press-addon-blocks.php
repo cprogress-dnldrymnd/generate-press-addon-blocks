@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: Generate Press Add-on Blocks
+ * Plugin Name: GeneratePress Add-on Blocks
  * Description: A scalable collection of custom, performance-optimized Gutenberg blocks and extensions for GeneratePress.
  * Version: 2.0.1
  * Author: Digitally Disruptive - Donald Raymundo
@@ -12,7 +12,7 @@
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
-
+define('GeneratePress_Addon_Version', '2.0.1');
 /**
  * Centralized block registry for Generate Press Add-on Blocks.
  * Iterates through a configuration array to dynamically register block scripts, styles, and behaviors.
@@ -61,26 +61,26 @@ function dd_gp_register_addon_blocks()
         );
 
         // Register and assign the Editor Script
-        wp_register_script($script_handle, plugins_url($config['script_file'], __FILE__), array('wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-data'), '1.8.0', true);
+        wp_register_script($script_handle, plugins_url($config['script_file'], __FILE__), array('wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-data'), GeneratePress_Addon_Version, true);
         $block_args['editor_script'] = $script_handle;
 
         // Register and assign the Frontend/Shared Style
         if (! empty($config['style_file'])) {
             $style_deps = isset($config['style_deps']) ? $config['style_deps'] : array();
-            wp_register_style($style_handle, plugins_url($config['style_file'], __FILE__), $style_deps, '1.8.0');
+            wp_register_style($style_handle, plugins_url($config['style_file'], __FILE__), $style_deps, GeneratePress_Addon_Version);
             $block_args['style'] = $style_handle;
         }
 
         // Register and assign the Editor-Specific Style
         if (! empty($config['editor_style_file'])) {
-            wp_register_style($editor_style_handle, plugins_url($config['editor_style_file'], __FILE__), array(), '1.8.0');
+            wp_register_style($editor_style_handle, plugins_url($config['editor_style_file'], __FILE__), array(), GeneratePress_Addon_Version);
             $block_args['editor_style'] = $editor_style_handle;
         }
 
         // Register and assign the Frontend View Script
         if (! empty($config['view_script_file'])) {
             $view_script_deps = isset($config['view_script_deps']) ? $config['view_script_deps'] : array();
-            wp_register_script($view_script_handle, plugins_url($config['view_script_file'], __FILE__), $view_script_deps, '1.8.0', true);
+            wp_register_script($view_script_handle, plugins_url($config['view_script_file'], __FILE__), $view_script_deps, GeneratePress_Addon_Version, true);
             $block_args['view_script'] = $view_script_handle;
         }
 

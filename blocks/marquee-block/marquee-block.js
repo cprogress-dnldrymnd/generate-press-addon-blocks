@@ -23,6 +23,7 @@
 
             return el('div', blockProps,
                 el(InnerBlocks, {
+                    // Added generateblocks/image and generateblocks/headline
                     allowedBlocks: [
                         'generateblocks/image',
                         'generateblocks/text',
