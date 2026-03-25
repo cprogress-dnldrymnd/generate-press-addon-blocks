@@ -125,6 +125,8 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
 {
     $defaults = array(
         'taxonomy'           => 'category',
+        'showEmpty'          => false,
+        'excludeTerms'       => '',
         'displayName'        => true,
         'displayDescription' => false,
         'metaKey'            => '',
@@ -139,9 +141,16 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
 
     $taxonomy = $attributes['taxonomy'];
 
+    // Process comma-separated exclusion IDs securely into an array of integers
+    $exclude_ids = array();
+    if (! empty($attributes['excludeTerms'])) {
+        $exclude_ids = array_map('intval', array_map('trim', explode(',', $attributes['excludeTerms'])));
+    }
+
     $terms = get_terms(array(
         'taxonomy'   => $taxonomy,
-        'hide_empty' => false,
+        'hide_empty' => ! $attributes['showEmpty'], // Inverts logic: if showEmpty is true, hide_empty becomes false
+        'exclude'    => $exclude_ids,
     ));
 
     if (is_wp_error($terms) || empty($terms)) {
@@ -167,6 +176,7 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
                 <?php foreach ($terms as $term) : ?>
                     <div class="swiper-slide dd-term-slide">
                         <div class="dd-term-content">
+
                             <?php
                             // Process and render term meta strictly as an image
                             if (! empty($attributes['metaKey'])) {
@@ -183,15 +193,13 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
                             }
                             ?>
 
-                            <div class="dd-term-name-description">
-                                <?php if ($attributes['displayName']) : ?>
-                                    <h3 class="dd-term-name"><a href="<?php echo esc_url(get_term_link($term)); ?>"><?php echo esc_html($term->name); ?></a></h3>
-                                <?php endif; ?>
+                            <?php if ($attributes['displayName']) : ?>
+                                <h3 class="dd-term-name"><a href="<?php echo esc_url(get_term_link($term)); ?>"><?php echo esc_html($term->name); ?></a></h3>
+                            <?php endif; ?>
 
-                                <?php if ($attributes['displayDescription'] && ! empty($term->description)) : ?>
-                                    <div class="dd-term-description"><?php echo wp_kses_post(wpautop($term->description)); ?></div>
-                                <?php endif; ?>
-                            </div>
+                            <?php if ($attributes['displayDescription'] && ! empty($term->description)) : ?>
+                                <div class="dd-term-description"><?php echo wp_kses_post(wpautop($term->description)); ?></div>
+                            <?php endif; ?>
 
                         </div>
                     </div>
@@ -202,6 +210,7 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
                 <div class="swiper-pagination"></div>
             <?php endif; ?>
         </div>
+
         <?php if ($attributes['navigation']) : ?>
             <button class="gb-carousel-control gbp-carousel-controls gbp-carousel-controls__button gbp-carousel--control__previous gb-carousel-control--previous">
                 <span class="gb-carousel-control-icon">

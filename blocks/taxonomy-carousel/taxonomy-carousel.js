@@ -16,6 +16,8 @@
         description: 'Display taxonomy terms in an interactive Swiper slider.',
         attributes: {
             taxonomy: { type: 'string', default: 'category' },
+            showEmpty: { type: 'boolean', default: false },
+            excludeTerms: { type: 'string', default: '' },
             displayName: { type: 'boolean', default: true },
             displayDescription: { type: 'boolean', default: false },
             metaKey: { type: 'string', default: '' },
@@ -54,6 +56,18 @@
                             value: attributes.taxonomy,
                             options: taxonomyOptions,
                             onChange: ( val ) => setAttributes( { taxonomy: val } )
+                        } ),
+                        el( ToggleControl, {
+                            label: 'Show Empty Terms',
+                            checked: attributes.showEmpty,
+                            onChange: ( val ) => setAttributes( { showEmpty: val } ),
+                            help: 'Display terms even if they have no associated posts.'
+                        } ),
+                        el( TextControl, {
+                            label: 'Exclude Term IDs',
+                            value: attributes.excludeTerms,
+                            onChange: ( val ) => setAttributes( { excludeTerms: val } ),
+                            help: 'Comma-separated list of term IDs to exclude (e.g., 12, 34).'
                         } ),
                         el( ToggleControl, {
                             label: 'Display Term Name',
