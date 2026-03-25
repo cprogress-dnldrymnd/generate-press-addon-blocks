@@ -14,22 +14,6 @@ if (! defined('ABSPATH')) {
 }
 
 /**
- * Enqueues global frontend extensions, such as the native HTML5 Lightbox.
- * Loading is separated from block-specific assets to ensure availability on generic Core/GP blocks.
- *
- * @return void
- */
-function dd_gp_enqueue_global_extensions()
-{
-    // Only enqueue if we are on the frontend to keep the admin lean.
-    if (! is_admin()) {
-        wp_enqueue_script('dd-lightbox-script', plugins_url('extensions/lightbox/lightbox.js', __FILE__), array(), '1.7.0', true);
-        wp_enqueue_style('dd-lightbox-style', plugins_url('extensions/lightbox/lightbox.css', __FILE__), array(), '1.7.0');
-    }
-}
-add_action('wp_enqueue_scripts', 'dd_gp_enqueue_global_extensions');
-
-/**
  * Centralized block registry for Generate Press Add-on Blocks.
  * Iterates through a configuration array to dynamically register block scripts, styles, and behaviors.
  * Integrates external dependencies like Swiper.js for advanced interactive blocks.
