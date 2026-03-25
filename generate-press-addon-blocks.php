@@ -201,8 +201,20 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
         <?php endif; ?>
 
         <?php if ($attributes['navigation']) : ?>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-button-next"></div>
+            <button class="gb-carousel-control gbp-carousel-controls gbp-carousel-controls__button gbp-carousel--control__previous gb-carousel-control--previous">
+                <span class="gb-carousel-control-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
+                        <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
+                    </svg>
+                </span>
+            </button>
+            <button aria-label="Next slide" class="gb-carousel-control gbp-carousel-controls gbp-carousel-controls__button gbp-carousel--control__next gb-carousel-control--next">
+                <span class="gb-carousel-control-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
+                        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+                    </svg>
+                </span>
+            </button>
         <?php endif; ?>
     </div>
 <?php
