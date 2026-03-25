@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasPagination = carouselEl.dataset.pagination === 'true';
         const hasNavigation = carouselEl.dataset.navigation === 'true';
 
+        // Traverse up the DOM to find the custom parent wrapper enclosing the navigation buttons
+        const parentHolder = carouselEl.closest('.swiper-holder');
+
         // Construct Swiper configuration payload
         const swiperConfig = {
             slidesPerView: slidesPerView,
@@ -42,14 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        if ( hasNavigation ) {
+        // Only bind navigation if enabled and the parent wrapper is successfully located
+        if ( hasNavigation && parentHolder ) {
             /**
              * Target the newly integrated custom DOM classes for navigation.
-             * Swiper binds click events directly to these specific elements.
+             * We query from `parentHolder` instead of `carouselEl` because the buttons 
+             * are now external siblings to the main swiper track.
              */
             swiperConfig.navigation = {
-                nextEl: carouselEl.querySelector('.gb-carousel-control--next'),
-                prevEl: carouselEl.querySelector('.gb-carousel-control--previous'),
+                nextEl: parentHolder.querySelector('.gb-carousel-control--next'),
+                prevEl: parentHolder.querySelector('.gb-carousel-control--previous'),
             };
         }
 
