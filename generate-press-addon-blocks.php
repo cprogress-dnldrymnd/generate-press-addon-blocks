@@ -215,9 +215,11 @@ function term_image( $atts ) {
     // Retrieve the attachment ID from the term meta structure.
     $attachment_id = get_term_meta( $term_id, sanitize_key( $atts['meta_key'] ), true );
 
+    return $attachment_id;
+
     // Bail if no meta value is present.
     if ( empty( $attachment_id ) ) {
-        return 'x2';
+        return '';
     }
 
     // Retrieve the image URL based on the attachment ID and requested size parameters.
