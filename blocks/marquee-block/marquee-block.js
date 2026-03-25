@@ -14,20 +14,23 @@
         description: 'Add an infinitely scrolling row of logos or text.',
 
         /**
-         * Renders the editor interface. 
+         * Renders the editor interface for the marquee block.
+         * Sets up the InnerBlocks component with restricted block types to enforce design consistency.
          * Styling is now handled via the registered editor_style block attribute.
+         * * @param {Object} props The block properties passed by the Gutenberg editor.
+         * @returns {Object} The rendered WordPress element for the editor.
          */
         edit: function (props) {
-            // Retrieve default block properties without inline inline layout styles
+            // Retrieve default block properties without inline layout styles
             const blockProps = useBlockProps();
 
             return el('div', blockProps,
                 el(InnerBlocks, {
-                    // Added generateblocks/image and generateblocks/headline
+                    // Added generateblocks/image, generateblocks/headline, and core text support
                     allowedBlocks: [
                         'generateblocks/image',
-                        'generateblocks/text',
                         'generateblocks/headline',
+                        'core/paragraph' 
                     ],
                     orientation: 'horizontal',
                     renderAppender: InnerBlocks.ButtonBlockAppender
@@ -36,8 +39,9 @@
         },
 
         /**
-         * Saves the structural layout of the InnerBlocks.
+         * Saves the structural layout of the InnerBlocks to the database.
          * The dynamic duplication and wrapper classes are handled via the PHP render_callback.
+         * * @returns {Object} The serialized InnerBlocks content for the frontend.
          */
         save: function () {
             return el(InnerBlocks.Content, null);
