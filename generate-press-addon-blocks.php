@@ -57,7 +57,7 @@ function dd_gp_register_addon_blocks()
         $view_script_handle  = "dd-{$slug}-view-script";
 
         $block_args = array(
-            'api_version'   => 2.1,
+            'api_version'   => 2.2,
         );
 
         // Register and assign the Editor Script
