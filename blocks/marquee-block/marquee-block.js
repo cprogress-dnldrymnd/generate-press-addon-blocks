@@ -24,7 +24,6 @@
             return el('div', blockProps,
                 el(InnerBlocks, {
                     allowedBlocks: [
-                        'generateblocks/image',
                         'generateblocks/text',
                         'generateblocks/headline',
                     ],
