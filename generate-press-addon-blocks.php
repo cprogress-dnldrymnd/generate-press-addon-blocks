@@ -167,7 +167,6 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
                 <?php foreach ($terms as $term) : ?>
                     <div class="swiper-slide dd-term-slide">
                         <div class="dd-term-content">
-
                             <?php
                             // Process and render term meta strictly as an image
                             if (! empty($attributes['metaKey'])) {
@@ -184,13 +183,15 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
                             }
                             ?>
 
-                            <?php if ($attributes['displayName']) : ?>
-                                <h3 class="dd-term-name"><a href="<?php echo esc_url(get_term_link($term)); ?>"><?php echo esc_html($term->name); ?></a></h3>
-                            <?php endif; ?>
+                            <div class="dd-term-name-description">
+                                <?php if ($attributes['displayName']) : ?>
+                                    <h3 class="dd-term-name"><a href="<?php echo esc_url(get_term_link($term)); ?>"><?php echo esc_html($term->name); ?></a></h3>
+                                <?php endif; ?>
 
-                            <?php if ($attributes['displayDescription'] && ! empty($term->description)) : ?>
-                                <div class="dd-term-description"><?php echo wp_kses_post(wpautop($term->description)); ?></div>
-                            <?php endif; ?>
+                                <?php if ($attributes['displayDescription'] && ! empty($term->description)) : ?>
+                                    <div class="dd-term-description"><?php echo wp_kses_post(wpautop($term->description)); ?></div>
+                                <?php endif; ?>
+                            </div>
 
                         </div>
                     </div>
