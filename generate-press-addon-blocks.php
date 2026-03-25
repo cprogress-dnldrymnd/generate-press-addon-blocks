@@ -160,46 +160,47 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
 
     ob_start();
 ?>
-    <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-            ?>>
-        <div class="swiper-wrapper">
-            <?php foreach ($terms as $term) : ?>
-                <div class="swiper-slide dd-term-slide">
-                    <div class="dd-term-content">
+    <div class="swiper-holder">
+        <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+                ?>>
+            <div class="swiper-wrapper">
+                <?php foreach ($terms as $term) : ?>
+                    <div class="swiper-slide dd-term-slide">
+                        <div class="dd-term-content">
 
-                        <?php
-                        // Process and render term meta strictly as an image
-                        if (! empty($attributes['metaKey'])) {
-                            $meta_value = get_term_meta($term->term_id, $attributes['metaKey'], true);
+                            <?php
+                            // Process and render term meta strictly as an image
+                            if (! empty($attributes['metaKey'])) {
+                                $meta_value = get_term_meta($term->term_id, $attributes['metaKey'], true);
 
-                            if ($meta_value) {
-                                // Resolves numeric attachment IDs to URLs or accepts direct URLs
-                                $img_src = is_numeric($meta_value) ? wp_get_attachment_url((int) $meta_value) : $meta_value;
+                                if ($meta_value) {
+                                    // Resolves numeric attachment IDs to URLs or accepts direct URLs
+                                    $img_src = is_numeric($meta_value) ? wp_get_attachment_url((int) $meta_value) : $meta_value;
 
-                                if ($img_src) {
-                                    echo '<div class="dd-term-meta-image"><img src="' . esc_url($img_src) . '" alt="' . esc_attr($term->name) . '" /></div>';
+                                    if ($img_src) {
+                                        echo '<div class="dd-term-meta-image"><img src="' . esc_url($img_src) . '" alt="' . esc_attr($term->name) . '" /></div>';
+                                    }
                                 }
                             }
-                        }
-                        ?>
+                            ?>
 
-                        <?php if ($attributes['displayName']) : ?>
-                            <h3 class="dd-term-name"><a href="<?php echo esc_url(get_term_link($term)); ?>"><?php echo esc_html($term->name); ?></a></h3>
-                        <?php endif; ?>
+                            <?php if ($attributes['displayName']) : ?>
+                                <h3 class="dd-term-name"><a href="<?php echo esc_url(get_term_link($term)); ?>"><?php echo esc_html($term->name); ?></a></h3>
+                            <?php endif; ?>
 
-                        <?php if ($attributes['displayDescription'] && ! empty($term->description)) : ?>
-                            <div class="dd-term-description"><?php echo wp_kses_post(wpautop($term->description)); ?></div>
-                        <?php endif; ?>
+                            <?php if ($attributes['displayDescription'] && ! empty($term->description)) : ?>
+                                <div class="dd-term-description"><?php echo wp_kses_post(wpautop($term->description)); ?></div>
+                            <?php endif; ?>
 
+                        </div>
                     </div>
-                </div>
-            <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
+
+            <?php if ($attributes['pagination']) : ?>
+                <div class="swiper-pagination"></div>
+            <?php endif; ?>
         </div>
-
-        <?php if ($attributes['pagination']) : ?>
-            <div class="swiper-pagination"></div>
-        <?php endif; ?>
-
         <?php if ($attributes['navigation']) : ?>
             <button class="gb-carousel-control gbp-carousel-controls gbp-carousel-controls__button gbp-carousel--control__previous gb-carousel-control--previous">
                 <span class="gb-carousel-control-icon">
