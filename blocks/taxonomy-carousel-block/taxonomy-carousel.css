@@ -1,0 +1,51 @@
+/**
+ * Frontend styling for the Taxonomy Carousel dynamic elements.
+ * Extends the baseline Splide CSS with specific term card aesthetics.
+ */
+
+.dd-taxonomy-carousel {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.dd-term-slide {
+    display: flex;
+}
+
+.dd-term-link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 30px 20px;
+    background-color: #f1f1f1;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.dd-term-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    background-color: #fff;
+}
+
+.dd-term-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.dd-term-count {
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+/* Pagination / Arrow overrides to match GB defaults if necessary */
+.dd-taxonomy-carousel .splide__pagination__page.is-active {
+    background: #007cba;
+}
