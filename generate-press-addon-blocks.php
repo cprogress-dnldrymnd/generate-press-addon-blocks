@@ -203,7 +203,7 @@ function term_image( $atts ) {
         
         // Ensure the queried object is a valid WP_Term instance.
         if ( $queried_object instanceof WP_Term ) {
-            $term_id = $queried_object->term_id;
+            return $term_id = $queried_object->term_id;
         } 
     }
 
