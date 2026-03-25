@@ -95,8 +95,8 @@ add_action( 'init', 'dd_gp_register_addon_blocks' );
 /**
  * Renders the frontend output for the Lightbox Container dynamic Gutenberg block.
  * Resolves dynamic data (Post Meta) or executes shortcodes to generate the media URL,
- * conditionally injects an inline SVG play button overlay, and implements optional 
- * browser resource hints (preload/preconnect) to accelerate media delivery.
+ * conditionally injects an inline SVG play button overlay, and passes a data attribute
+ * to trigger JS-based preloading via Intersection Observer.
  *
  * @param array  $attributes Block attributes from the editor.
  * @param string $content    The saved InnerBlocks HTML content.
@@ -121,38 +121,24 @@ function dd_render_lightbox_container_block( $attributes, $content ) {
         $url = do_shortcode( $attributes['mediaUrl'] );
     }
 
-    // 3. Generate browser resource hints if preloading is enabled.
-    $resource_hint_html = '';
-    if ( ! empty( $attributes['preloadMedia'] ) && $url ) {
-        if ( preg_match( '/\.(mp4|webm|ogg)(\?.*)?$/i', $url ) ) {
-            // Direct video: Instruct the browser to begin fetching the video file.
-            $resource_hint_html = '<link rel="preload" href="' . esc_url( $url ) . '" as="video">';
-        } elseif ( preg_match( '/\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i', $url ) ) {
-            // Direct image: Instruct the browser to begin fetching the image file.
-            $resource_hint_html = '<link rel="preload" href="' . esc_url( $url ) . '" as="image">';
-        } elseif ( preg_match( '/(youtube\.com|youtu\.be)/i', $url ) ) {
-            // YouTube: Establish early network connections to Google's media domains.
-            $resource_hint_html = '<link rel="preconnect" href="https://www.youtube.com"><link rel="preconnect" href="https://i.ytimg.com">';
-        } elseif ( preg_match( '/vimeo\.com/i', $url ) ) {
-            // Vimeo: Establish early network connections to Vimeo's player and media domains.
-            $resource_hint_html = '<link rel="preconnect" href="https://player.vimeo.com"><link rel="preconnect" href="https://vimeo.com">';
-        }
-    }
-
     // Build the container attributes securely
-    $wrapper_attributes = get_block_wrapper_attributes( array(
+    $wrapper_args = array(
         'class'             => 'dd-lightbox-trigger-container',
         'data-lightbox-url' => esc_url( $url ), // Ensure output is a safely escaped URL
         'style'             => 'cursor: pointer;',
-    ) );
+    );
+
+    // Flag for the frontend Intersection Observer
+    if ( ! empty( $attributes['preloadMedia'] ) ) {
+        $wrapper_args['data-preload'] = 'true';
+    }
+
+    $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
 
     ob_start();
     ?>
     <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
         <?php 
-        // Output resource hints for performance optimization
-        echo $resource_hint_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
         // Inject the inline SVG play button overlay if enabled
         if ( ! empty( $attributes['showPlayButton'] ) ) {
             echo '<div class="dd-lightbox-play-button">';

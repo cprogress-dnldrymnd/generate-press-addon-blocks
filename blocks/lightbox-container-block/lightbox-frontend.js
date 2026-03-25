@@ -1,13 +1,13 @@
 /**
  * Handles the frontend interaction and media routing for the Lightbox Container.
- * Detects the URL type, generates the media node inside the modal, and manages
- * the lifecycle of the HTML5 dialog, including entrance/exit animations.
+ * Detects the URL type, generates the media node inside the modal, manages
+ * the lifecycle of the HTML5 dialog, and handles aggressive Intersection Observer preloading.
  */
 document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Determines the type of media based on the URL string.
-     * * @param {string} url The media URL.
+     * @param {string} url The media URL.
      * @return {string} The media type ('image', 'video', 'youtube', 'vimeo', or 'iframe').
      */
     const getMediaType = (url) => {
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Converts a standard YouTube URL into an embeddable iframe URL.
-     * * @param {string} url The raw YouTube URL.
+     * @param {string} url The raw YouTube URL.
      * @return {string} The embeddable YouTube URL.
      */
     const getYouTubeEmbedUrl = (url) => {
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Creates or retrieves the singleton <dialog> element for the lightbox.
      * Hooks into CSS animations to ensure smooth transitions before unmounting content.
-     * * @return {HTMLDialogElement} The dialog node.
+     * @return {HTMLDialogElement} The dialog node.
      */
     const getOrCreateDialog = () => {
         let dialog = document.getElementById('dd-global-media-lightbox');
@@ -59,15 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
              * Triggers the exit animation, waits for completion, then removes the dialog.
              */
             const closeLightbox = () => {
-                // Apply the CSS class that triggers the exit animation keyframes
                 dialog.classList.add('dd-lightbox-closing');
-                
-                // Wait for the animation to finish before destroying content and closing native dialog
                 dialog.addEventListener('animationend', function handleAnimationEnd() {
                     dialog.classList.remove('dd-lightbox-closing');
                     contentWrapper.innerHTML = ''; // Clear media to stop video playback
                     dialog.close();
-                    dialog.removeEventListener('animationend', handleAnimationEnd); // Cleanup listener
+                    dialog.removeEventListener('animationend', handleAnimationEnd);
                 }, { once: true });
             };
 
@@ -79,12 +76,69 @@ document.addEventListener('DOMContentLoaded', () => {
         return dialog;
     };
 
-    // Initialize all lightbox triggers on the page
+    // --- Preload Observer Logic ---
+    const preloadObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const container = entry.target;
+                const url = container.getAttribute('data-lightbox-url');
+                const mediaType = getMediaType(url);
+
+                if (url) {
+                    if (mediaType === 'image') {
+                        const link = document.createElement('link');
+                        link.rel = 'preload';
+                        link.as = 'image';
+                        link.href = url;
+                        document.head.appendChild(link);
+                    } 
+                    else if (mediaType === 'video') {
+                        // Create an invisible video node to reliably force Chromium to cache the file
+                        const hiddenVideo = document.createElement('video');
+                        hiddenVideo.preload = 'auto';
+                        hiddenVideo.src = url;
+                        hiddenVideo.style.position = 'absolute';
+                        hiddenVideo.style.width = '0';
+                        hiddenVideo.style.height = '0';
+                        hiddenVideo.style.opacity = '0';
+                        document.body.appendChild(hiddenVideo);
+                    } 
+                    else if (mediaType === 'youtube') {
+                        ['https://www.youtube.com', 'https://i.ytimg.com'].forEach(domain => {
+                            const link = document.createElement('link');
+                            link.rel = 'preconnect';
+                            link.href = domain;
+                            document.head.appendChild(link);
+                        });
+                    } 
+                    else if (mediaType === 'vimeo') {
+                        ['https://player.vimeo.com', 'https://vimeo.com'].forEach(domain => {
+                            const link = document.createElement('link');
+                            link.rel = 'preconnect';
+                            link.href = domain;
+                            document.head.appendChild(link);
+                        });
+                    }
+                }
+                // Unobserve after firing once to save resources
+                observer.unobserve(container);
+            }
+        });
+    }, {
+        rootMargin: '200px 0px', // Trigger when within 200px of scrolling into view
+        threshold: 0.1
+    });
+
+    // --- Click Event Logic ---
     const triggers = document.querySelectorAll('.dd-lightbox-trigger-container');
 
     triggers.forEach(container => {
+        // Attach observer if preloading is enabled for this specific block
+        if (container.getAttribute('data-preload') === 'true') {
+            preloadObserver.observe(container);
+        }
+
         container.addEventListener('click', (e) => {
-            // Prevent click if user is clicking an internal anchor link
             if (e.target.tagName.toLowerCase() === 'a') return; 
 
             const url = container.getAttribute('data-lightbox-url');
@@ -94,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const wrapper = dialog.querySelector('.dd-lightbox-content-wrapper');
             const mediaType = getMediaType(url);
             
-            wrapper.innerHTML = ''; // Reset
+            wrapper.innerHTML = ''; 
 
             if (mediaType === 'image') {
                 const img = document.createElement('img');
@@ -115,14 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 iframe.allow = 'autoplay; fullscreen; picture-in-picture';
                 iframe.setAttribute('allowfullscreen', '');
                 
-                // Add a responsive wrapper for the 16:9 aspect ratio
                 const ratioWrapper = document.createElement('div');
                 ratioWrapper.className = 'dd-responsive-iframe-wrapper';
                 ratioWrapper.appendChild(iframe);
                 wrapper.appendChild(ratioWrapper);
             }
 
-            // Native HTML5 dialog method to open with backdrop
             dialog.showModal();
         });
     });
