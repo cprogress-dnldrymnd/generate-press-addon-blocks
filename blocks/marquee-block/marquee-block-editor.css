@@ -1,31 +1,45 @@
 /**
- * Editor-only styles for the Logo Marquee block.
+ * Editor-only styles for the Marquee block.
  * Targets Gutenberg's injected InnerBlocks wrappers to force horizontal layout.
  */
 
-/* Override the default vertical stacking of Gutenberg's InnerBlocks wrapper */
+/* Override the default vertical stacking and enable horizontal scrolling */
 .wp-block-dd-marquee > .block-editor-inner-blocks > .block-editor-block-list__layout {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     overflow-x: auto;
+    overflow-y: hidden;
     align-items: center;
     gap: 40px;
-    padding: 20px;
+    padding: 20px 20px 30px 20px; /* Added bottom padding to accommodate the scrollbar */
     border: 2px dashed #ccc;
+    width: 100%;
 }
-/* Prevent image blocks from squishing and remove default margins */
+
+/* Custom scrollbar styling for the editor to make navigation clear */
+.wp-block-dd-marquee > .block-editor-inner-blocks > .block-editor-block-list__layout::-webkit-scrollbar {
+    height: 8px;
+}
+.wp-block-dd-marquee > .block-editor-inner-blocks > .block-editor-block-list__layout::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+/* Prevent image blocks from squishing */
 .wp-block-dd-marquee .wp-block-image,
 .wp-block-dd-marquee .wp-block-generateblocks-image,
 .wp-block-dd-marquee .wp-block-generateblocks-media {
     margin: 0;
     display: flex;
     align-items: center;
-    flex-shrink: 0;
+    flex-shrink: 0 !important; 
 }
+
 /* Enforce uniform height matching the frontend output */
 .wp-block-dd-marquee .wp-block-image img,
-.wp-block-dd-marquee .wp-block-generateblocks-image img {
+.wp-block-dd-marquee .wp-block-generateblocks-image img,
+.wp-block-dd-marquee .wp-block-generateblocks-media img {
     height: 35px;
     width: auto;
     max-width: none;
@@ -33,13 +47,27 @@
     display: block;
 }
 
-/* Prevent text block compression in the editor */
+/* Aggressively force single-line text against GenerateBlocks editor defaults */
 .wp-block-dd-marquee .wp-block-paragraph,
 .wp-block-dd-marquee .wp-block-heading,
-.wp-block-dd-marquee .wp-block-generateblocks-headline {
+.wp-block-dd-marquee .wp-block-generateblocks-headline,
+.wp-block-dd-marquee .wp-block-generateblocks-text,
+.wp-block-dd-marquee .wp-block-generateblocks-headline *,
+.wp-block-dd-marquee .wp-block-generateblocks-text * {
     margin: 0;
-    white-space: nowrap;
-    flex-shrink: 0;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    flex-shrink: 0 !important;
     display: flex;
     align-items: center;
+}
+
+/* Force the block inserter button to remain visible and prevent it from squishing */
+.wp-block-dd-marquee .block-list-appender {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 56px;
+    margin: 0 !important;
 }
