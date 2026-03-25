@@ -1,13 +1,13 @@
 /**
  * Registers the 'dd/lightbox-container' block.
  * Provides a structural wrapper with InnerBlocks for layout design.
- * Now acts as a Dynamic Block, passing attributes to PHP for server-side dynamic URL resolution
- * and optional play button rendering.
+ * Acts as a Dynamic Block, passing attributes to PHP for server-side dynamic URL resolution,
+ * optional play button rendering, and media preloading optimization.
  */
 ( function( wp ) {
     const { registerBlockType } = wp.blocks;
     const { InnerBlocks, InspectorControls, useBlockProps } = wp.blockEditor;
-    const { PanelBody, TextControl, ToggleControl } = wp.components;
+    const { PanelBody, TextControl, ToggleControl, Notice } = wp.components;
     const { createElement: el } = wp.element;
 
     registerBlockType( 'dd/lightbox-container', {
@@ -31,12 +31,17 @@
             showPlayButton: {
                 type: 'boolean',
                 default: false
+            },
+            preloadMedia: {
+                type: 'boolean',
+                default: false
             }
         },
         
         /**
          * Renders the editor interface.
-         * Outputs InspectorControls for dynamic routing, play button toggle, and InnerBlocks for visual design.
+         * Outputs InspectorControls for dynamic routing, visual toggles, performance settings,
+         * and InnerBlocks for the structural design.
          *
          * @param {Object} props Block properties and attributes.
          * @return {Object} The rendered React element.
@@ -80,15 +85,32 @@
                                 onChange: ( val ) => setAttributes( { mediaUrl: val } ),
                                 help: 'Paste an image link, YouTube URL, or a dynamic shortcode.'
                             } )
+                    ),
+                    el( PanelBody, { title: 'Performance', initialOpen: false },
+                        el( ToggleControl, {
+                            label: 'Preload Media',
+                            checked: attributes.preloadMedia,
+                            onChange: ( val ) => setAttributes( { preloadMedia: val } ),
+                            help: 'Instructs the browser to fetch media or establish server connections early for instant loading.'
+                        } ),
+                        attributes.preloadMedia ? 
+                            el( Notice, { isDismissible: false, status: 'warning' }, 
+                                'Use sparingly. Preloading multiple large videos on a single page can degrade initial load speed.' 
+                            ) 
+                        : null
                     )
                 ),
                 el( 'div', blockProps,
                     // Editor visual indicator
                     el( 'div', { style: { position: 'absolute', top: '-10px', left: '10px', background: '#007cba', color: '#fff', padding: '2px 8px', fontSize: '11px', borderRadius: '3px', zIndex: 10 } }, 'Lightbox Container (Dynamic)' ),
                     
-                    // Render a visual placeholder for the play button in the editor if enabled
+                    // Render a visual SVG placeholder for the play button in the editor if enabled
                     attributes.showPlayButton ? 
-                        el( 'div', { className: 'dd-lightbox-play-button', style: { pointerEvents: 'none' } } ) 
+                        el( 'div', { className: 'dd-lightbox-play-button', style: { pointerEvents: 'none' } },
+                            el( 'svg', { viewBox: '0 0 24 24', xmlns: 'http://www.w3.org/2000/svg', fill: 'currentColor', width: '28', height: '28' },
+                                el( 'path', { d: 'M8 5v14l11-7z' } )
+                            )
+                        ) 
                     : null,
 
                     el( InnerBlocks, {
@@ -100,7 +122,7 @@
 
         /**
          * Saves the structural layout of the InnerBlocks.
-         * The wrapper, dynamic 'data-lightbox-url', and play button are generated via the PHP render_callback.
+         * All dynamic wrappers, resource hints, and SVG elements are handled via the PHP render_callback.
          *
          * @param {Object} props Block properties and attributes.
          * @return {Object} The rendered React element for the database.
