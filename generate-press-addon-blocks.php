@@ -28,9 +28,9 @@ function dd_gp_register_addon_blocks()
 
     $blocks = array(
         'marquee' => array(
-            'script_file'       => 'blocks/marquee-block-v2/marquee-block.js',
-            'style_file'        => 'blocks/marquee-block-v2/marquee-block.css',
-            'editor_style_file' => 'blocks/marquee-block-v2/marquee-block-editor.css',
+            'script_file'       => 'blocks/marquee-block/marquee-block.js',
+            'style_file'        => 'blocks/marquee-block/marquee-block.css',
+            'editor_style_file' => 'blocks/marquee-block/marquee-block-editor.css',
             'render_callback'   => 'dd_render_marquee_block',
         ),
         'lightbox-container' => array(
