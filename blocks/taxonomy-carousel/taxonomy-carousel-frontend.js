@@ -43,6 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if ( hasNavigation ) {
+            /**
+             * Target the newly integrated custom DOM classes for navigation.
+             * Swiper binds click events directly to these specific elements.
+             */
             swiperConfig.navigation = {
                 nextEl: carouselEl.querySelector('.gb-carousel-control--next'),
                 prevEl: carouselEl.querySelector('.gb-carousel-control--previous'),
