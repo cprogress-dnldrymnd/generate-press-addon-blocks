@@ -27,7 +27,7 @@ function dd_gp_register_addon_blocks()
     wp_register_style('swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.0');
 
     $blocks = array(
-        'logo-marquee' => array(
+        'marquee' => array(
             'script_file'       => 'blocks/marquee-block/marquee-block.js',
             'style_file'        => 'blocks/marquee-block/marquee-block.css',
             'editor_style_file' => 'blocks/marquee-block/marquee-block-editor.css',

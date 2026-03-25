@@ -4,7 +4,7 @@
  */
 
 /* Override the default vertical stacking of Gutenberg's InnerBlocks wrapper */
-.wp-block-dd-logo-marquee > .block-editor-inner-blocks > .block-editor-block-list__layout {
+.wp-block-dd-marquee > .block-editor-inner-blocks > .block-editor-block-list__layout {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -16,7 +16,7 @@
 }
 
 /* Prevent image blocks from squishing and remove default margins */
-.wp-block-dd-logo-marquee .wp-block-image {
+.wp-block-dd-marquee .wp-block-image {
     margin: 0;
     display: flex;
     align-items: center;
@@ -24,7 +24,7 @@
 }
 
 /* Enforce uniform height matching the frontend output */
-.wp-block-dd-logo-marquee .wp-block-image img {
+.wp-block-dd-marquee .wp-block-image img {
     height: 35px;
     width: auto;
     max-width: none;
@@ -32,8 +32,8 @@
     display: block;
 }
 
-.wp-block-dd-logo-marquee .wp-block-paragraph,
-.wp-block-dd-logo-marquee .wp-block-heading {
+.wp-block-dd-marquee .wp-block-paragraph,
+.wp-block-dd-marquee .wp-block-heading {
     margin: 0;
     white-space: nowrap;
     flex-shrink: 0;
