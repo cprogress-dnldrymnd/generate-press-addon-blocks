@@ -95,8 +95,7 @@ add_action( 'init', 'dd_gp_register_addon_blocks' );
 /**
  * Renders the frontend output for the Lightbox Container dynamic Gutenberg block.
  * Resolves dynamic data (Post Meta) or executes shortcodes to generate the media URL,
- * conditionally injects an inline SVG play button overlay, and passes a data attribute
- * to trigger JS-based preloading via Intersection Observer.
+ * and conditionally injects an inline SVG play button overlay based on block attributes.
  *
  * @param array  $attributes Block attributes from the editor.
  * @param string $content    The saved InnerBlocks HTML content.
@@ -122,18 +121,11 @@ function dd_render_lightbox_container_block( $attributes, $content ) {
     }
 
     // Build the container attributes securely
-    $wrapper_args = array(
+    $wrapper_attributes = get_block_wrapper_attributes( array(
         'class'             => 'dd-lightbox-trigger-container',
         'data-lightbox-url' => esc_url( $url ), // Ensure output is a safely escaped URL
         'style'             => 'cursor: pointer;',
-    );
-
-    // Flag for the frontend Intersection Observer
-    if ( ! empty( $attributes['preloadMedia'] ) ) {
-        $wrapper_args['data-preload'] = 'true';
-    }
-
-    $wrapper_attributes = get_block_wrapper_attributes( $wrapper_args );
+    ) );
 
     ob_start();
     ?>
@@ -152,6 +144,7 @@ function dd_render_lightbox_container_block( $attributes, $content ) {
     <?php
     return ob_get_clean();
 }
+
 /**
  * Renders the frontend output for the Logo Marquee dynamic Gutenberg block.
  *
