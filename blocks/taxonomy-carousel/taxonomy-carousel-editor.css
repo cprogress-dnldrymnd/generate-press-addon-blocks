@@ -1,0 +1,22 @@
+/**
+ * Editor UX styling.
+ * Applies visual indicators representing dynamic block generation states.
+ */
+
+.dd-taxonomy-carousel-editor {
+    border: 2px dashed #007cba;
+    padding: 20px;
+    background-color: #f3f9fd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.dd-editor-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #007cba;
+    font-size: 16px;
+    gap: 10px;
+}

@@ -1,0 +1,74 @@
+/**
+ * Global component styles for the Taxonomy Carousel layout structure.
+ * Swiper base dependencies are dynamically fetched via CDN.
+ */
+
+.dd-taxonomy-carousel {
+    position: relative;
+    width: 100%;
+    padding-bottom: 40px; /* Room for pagination */
+    overflow: hidden;
+}
+
+.dd-term-slide {
+    height: auto;
+    display: flex;
+}
+
+.dd-term-content {
+    background: #ffffff;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dd-term-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.dd-term-meta-image img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.dd-term-meta-text {
+    font-size: 0.85em;
+    text-transform: uppercase;
+    color: #007cba;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.dd-term-name {
+    margin: 0 0 10px 0;
+    font-size: 1.25em;
+}
+
+.dd-term-name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.dd-term-description {
+    font-size: 0.95em;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* Adjust swiper controls positioning relative to container */
+.dd-taxonomy-carousel .swiper-pagination {
+    bottom: 0;
+}
+.dd-taxonomy-carousel .swiper-button-next,
+.dd-taxonomy-carousel .swiper-button-prev {
+    color: #007cba;
+}

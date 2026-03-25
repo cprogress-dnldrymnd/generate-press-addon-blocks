@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Generate Press Add-on Blocks
  * Description: A scalable collection of custom, performance-optimized Gutenberg blocks and extensions for GeneratePress.
- * Version: 1.7.0
+ * Version: 1.8.0
  * Author: Digitally Disruptive - Donald Raymundo
  * Author URI: https://digitallydisruptive.co.uk/
  * Text Domain: dd-gp-addon-blocks
@@ -30,10 +30,15 @@ add_action( 'wp_enqueue_scripts', 'dd_gp_enqueue_global_extensions' );
 /**
  * Centralized block registry for Generate Press Add-on Blocks.
  * Iterates through a configuration array to dynamically register block scripts, styles, and behaviors.
+ * Integrates external dependencies like Swiper.js for advanced interactive blocks.
  *
  * @return void
  */
 function dd_gp_register_addon_blocks() {
+    // Register Swiper.js globally for blocks that require it
+    wp_register_script( 'swiper-js', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js', array(), '11.0.0', true );
+    wp_register_style( 'swiper-css', 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css', array(), '11.0.0' );
+
     $blocks = array(
         'logo-marquee' => array(
             'script_file'       => 'blocks/marquee-block/marquee-block.js',
@@ -45,8 +50,16 @@ function dd_gp_register_addon_blocks() {
             'script_file'       => 'blocks/lightbox-container-block/lightbox-container.js',
             'style_file'        => 'blocks/lightbox-container-block/lightbox-container.css',
             'view_script_file'  => 'blocks/lightbox-container-block/lightbox-frontend.js', 
-            // Now utilizing a PHP callback to process dynamic data before rendering
             'render_callback'   => 'dd_render_lightbox_container_block', 
+        ),
+        'taxonomy-carousel' => array(
+            'script_file'       => 'blocks/taxonomy-carousel/taxonomy-carousel.js',
+            'style_file'        => 'blocks/taxonomy-carousel/taxonomy-carousel.css',
+            'editor_style_file' => 'blocks/taxonomy-carousel/taxonomy-carousel-editor.css',
+            'view_script_file'  => 'blocks/taxonomy-carousel/taxonomy-carousel-frontend.js',
+            'render_callback'   => 'dd_render_taxonomy_carousel_block',
+            'style_deps'        => array( 'swiper-css' ),
+            'view_script_deps'  => array( 'swiper-js' ),
         ),
     );
 
@@ -61,24 +74,26 @@ function dd_gp_register_addon_blocks() {
         );
 
         // Register and assign the Editor Script
-        wp_register_script( $script_handle, plugins_url( $config['script_file'], __FILE__ ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components' ), '1.7.0', true );
+        wp_register_script( $script_handle, plugins_url( $config['script_file'], __FILE__ ), array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-data' ), '1.8.0', true );
         $block_args['editor_script'] = $script_handle;
 
         // Register and assign the Frontend/Shared Style
         if ( ! empty( $config['style_file'] ) ) {
-            wp_register_style( $style_handle, plugins_url( $config['style_file'], __FILE__ ), array(), '1.7.0' );
+            $style_deps = isset( $config['style_deps'] ) ? $config['style_deps'] : array();
+            wp_register_style( $style_handle, plugins_url( $config['style_file'], __FILE__ ), $style_deps, '1.8.0' );
             $block_args['style'] = $style_handle;
         }
 
         // Register and assign the Editor-Specific Style
         if ( ! empty( $config['editor_style_file'] ) ) {
-            wp_register_style( $editor_style_handle, plugins_url( $config['editor_style_file'], __FILE__ ), array(), '1.7.0' );
+            wp_register_style( $editor_style_handle, plugins_url( $config['editor_style_file'], __FILE__ ), array(), '1.8.0' );
             $block_args['editor_style'] = $editor_style_handle;
         }
 
         // Register and assign the Frontend View Script
         if ( ! empty( $config['view_script_file'] ) ) {
-            wp_register_script( $view_script_handle, plugins_url( $config['view_script_file'], __FILE__ ), array(), '1.7.0', true );
+            $view_script_deps = isset( $config['view_script_deps'] ) ? $config['view_script_deps'] : array();
+            wp_register_script( $view_script_handle, plugins_url( $config['view_script_file'], __FILE__ ), $view_script_deps, '1.8.0', true );
             $block_args['view_script'] = $view_script_handle;
         }
 
@@ -91,6 +106,88 @@ function dd_gp_register_addon_blocks() {
     }
 }
 add_action( 'init', 'dd_gp_register_addon_blocks' );
+
+/**
+ * Renders the frontend output for the Taxonomy Terms Carousel block.
+ * Dynamically queries taxonomy terms, resolves associated meta fields, and constructs the DOM
+ * structure required by Swiper.js. Passes configuration to JS via data attributes.
+ *
+ * @param array  $attributes Block attributes configured in the editor.
+ * @param string $content    The saved InnerBlocks HTML content (empty for this dynamic block).
+ * @return string HTML output for the Swiper carousel.
+ */
+function dd_render_taxonomy_carousel_block( $attributes, $content ) {
+    $taxonomy = ! empty( $attributes['taxonomy'] ) ? $attributes['taxonomy'] : 'category';
+    
+    $terms = get_terms( array(
+        'taxonomy'   => $taxonomy,
+        'hide_empty' => false,
+    ) );
+
+    if ( is_wp_error( $terms ) || empty( $terms ) ) {
+        return '<p>No terms found for taxonomy: ' . esc_html( $taxonomy ) . '</p>';
+    }
+
+    // Build the container attributes, injecting Swiper configuration via data sets
+    $wrapper_attributes = get_block_wrapper_attributes( array(
+        'class'              => 'dd-taxonomy-carousel swiper',
+        'data-slides-per-view' => esc_attr( $attributes['slidesPerView'] ),
+        'data-space-between'   => esc_attr( $attributes['spaceBetween'] ),
+        'data-autoplay'        => esc_attr( $attributes['autoplay'] ? 'true' : 'false' ),
+        'data-loop'            => esc_attr( $attributes['loop'] ? 'true' : 'false' ),
+        'data-pagination'      => esc_attr( $attributes['pagination'] ? 'true' : 'false' ),
+        'data-navigation'      => esc_attr( $attributes['navigation'] ? 'true' : 'false' ),
+    ) );
+
+    ob_start();
+    ?>
+    <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+        <div class="swiper-wrapper">
+            <?php foreach ( $terms as $term ) : ?>
+                <div class="swiper-slide dd-term-slide">
+                    <div class="dd-term-content">
+                        
+                        <?php 
+                        // Process and render term meta if configured
+                        if ( ! empty( $attributes['metaKey'] ) ) {
+                            $meta_value = get_term_meta( $term->term_id, $attributes['metaKey'], true );
+                            if ( $meta_value ) {
+                                if ( $attributes['metaType'] === 'image' ) {
+                                    // Handle image output (Assumes URL is stored directly, adjust if attachment ID is stored)
+                                    $img_src = is_numeric( $meta_value ) ? wp_get_attachment_url( $meta_value ) : $meta_value;
+                                    echo '<div class="dd-term-meta-image"><img src="' . esc_url( $img_src ) . '" alt="' . esc_attr( $term->name ) . '" /></div>';
+                                } else {
+                                    echo '<div class="dd-term-meta-text">' . esc_html( $meta_value ) . '</div>';
+                                }
+                            }
+                        }
+                        ?>
+
+                        <?php if ( ! empty( $attributes['displayName'] ) ) : ?>
+                            <h3 class="dd-term-name"><a href="<?php echo esc_url( get_term_link( $term ) ); ?>"><?php echo esc_html( $term->name ); ?></a></h3>
+                        <?php endif; ?>
+
+                        <?php if ( ! empty( $attributes['displayDescription'] ) && ! empty( $term->description ) ) : ?>
+                            <div class="dd-term-description"><?php echo wp_kses_post( wpautop( $term->description ) ); ?></div>
+                        <?php endif; ?>
+
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        
+        <?php if ( ! empty( $attributes['pagination'] ) ) : ?>
+            <div class="swiper-pagination"></div>
+        <?php endif; ?>
+
+        <?php if ( ! empty( $attributes['navigation'] ) ) : ?>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        <?php endif; ?>
+    </div>
+    <?php
+    return ob_get_clean();
+}
 
 /**
  * Renders the frontend output for the Lightbox Container dynamic Gutenberg block.
