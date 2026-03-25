@@ -272,7 +272,7 @@ function dd_render_lightbox_container_block($attributes, $content)
 }
 
 /**
- * Renders the frontend output for the Logo Marquee dynamic Gutenberg block.
+ * Renders the frontend output for the Marquee dynamic Gutenberg block.
  *
  * @param array  $attributes Block attributes.
  * @param string $content    The saved InnerBlocks HTML content.
