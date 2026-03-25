@@ -25,11 +25,9 @@
                 el(InnerBlocks, {
                     // Added generateblocks/image and generateblocks/headline
                     allowedBlocks: [
-                        'core/image',
-                        'core/paragraph',
-                        'core/heading',
                         'generateblocks/image',
-                        'generateblocks/headline'
+                        'generateblocks/text'
+                        'generateblocks/headline',
                     ],
                     orientation: 'horizontal',
                     renderAppender: InnerBlocks.ButtonBlockAppender
