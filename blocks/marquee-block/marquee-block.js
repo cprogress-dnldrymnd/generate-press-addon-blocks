@@ -27,7 +27,9 @@
             return el('div', blockProps,
                 el(InnerBlocks, {
                     allowedBlocks: [
+                        'generateblocks/media',
                         'generateblocks/text',
+                        
                     ],
                     orientation: 'horizontal',
                     renderAppender: InnerBlocks.ButtonBlockAppender
