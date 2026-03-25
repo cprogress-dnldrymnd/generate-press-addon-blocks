@@ -26,7 +26,7 @@
                     // Added generateblocks/image and generateblocks/headline
                     allowedBlocks: [
                         'generateblocks/image',
-                        'generateblocks/text'
+                        'generateblocks/text',
                         'generateblocks/headline',
                     ],
                     orientation: 'horizontal',
