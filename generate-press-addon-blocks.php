@@ -122,7 +122,7 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
 
     $terms = get_terms(array(
         'taxonomy'   => $taxonomy,
-        'hide_empty' => true,
+        'hide_empty' => false,
     ));
 
     if (is_wp_error($terms) || empty($terms)) {
