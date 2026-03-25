@@ -20,11 +20,10 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-}
-
-.dd-term-meta-image {
     text-align: center;
 }
+
+
 .dd-term-meta-image img {
     width: 100%;
     object-fit: cover;
@@ -35,17 +34,12 @@
     border: 1px solid var(--base);
 }
 
-.dd-term-meta-text {
-    font-size: 0.85em;
-    text-transform: uppercase;
-    color: #007cba;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
+
 
 .dd-term-name {
     margin: 0 0 10px 0;
-    font-size: 1.25em;
+    font-size: 1.125rem;
+    text-decoration: underline;
 }
 
 .dd-term-name a {
