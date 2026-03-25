@@ -72,3 +72,6 @@
 .dd-taxonomy-carousel .swiper-button-prev {
     color: #007cba;
 }
+.swiper-holder {
+    position: relative;
+}
