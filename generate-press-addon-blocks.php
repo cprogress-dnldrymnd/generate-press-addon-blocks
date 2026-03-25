@@ -12,7 +12,7 @@
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
-define('GeneratePress_Addon_Version', '2.1.5');
+define('GeneratePress_Addon_Version', '2.1.6');
 /**
  * Centralized block registry for Generate Press Add-on Blocks.
  * Iterates through a configuration array to dynamically register block scripts, styles, and behaviors.
