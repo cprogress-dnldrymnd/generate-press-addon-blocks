@@ -166,33 +166,65 @@ function dd_render_marquee_block( $attributes, $content ) {
     return ob_get_clean();
 }
 
-function test() {
-    return 'https://thinklaser.theprogressteam.com/wp-content/uploads/2026/03/stock-photo-laser-cutting-machine-in-industrial-factory-producing-precision-metal-parts-2643491785@2x-600x410.png';
-}   
-add_shortcode('test', 'test');
 
 /**
- * Evaluates shortcodes within GenerateBlocks dynamic URLs.
- * * Intercepts the raw URL string before it is rendered by the Block Editor 
- * or frontend. If shortcode brackets are detected, it executes do_shortcode() 
- * to ensure the actual URL payload is returned to the image src attribute.
+ * Retrieves the image URL associated with a specific term via a shortcode.
+ * * This function extracts a term meta value (expected to be an attachment ID),
+ * and returns the corresponding image URL for the requested size. It defaults 
+ * to the currently queried term if no specific term ID is provided, making it
+ * compatible with standard taxonomy archives and GenerateBlocks query loops.
  *
- * @param string $url        The dynamically retrieved URL string.
- * @param array  $attributes The array of block attributes associated with the current block.
- * @return string            The fully processed URL string.
+ * @param array $atts {
+ * Shortcode attributes.
+ *
+ * @type string $meta_key   The term meta key storing the attachment ID. Default 'thumbnail_id'.
+ * @type string $size       The registered image size to retrieve. Default 'full'.
+ * @type int    $term_id    Optional. Explicit term ID. Defaults to the current queried object.
+ * }
+ * @return string The resolved image URL, or an empty string if resolution fails.
  */
-function dd_gb_parse_dynamic_url_shortcodes( $url, $attributes ) {
-    // Verify the URL is not empty and contains structural shortcode brackets
-    if ( ! empty( $url ) && strpos( $url, '[' ) !== false && strpos( $url, ']' ) !== false ) {
-        // Execute the shortcode to extract the underlying URL
-        $url = do_shortcode( $url );
+function term_image( $atts ) {
+    // Parse attributes with strictly defined defaults
+    $atts = shortcode_atts(
+        array(
+            'meta_key' => 'thumbnail_id',
+            'size'     => 'large',
+            'term_id'  => 0,
+        ),
+        $atts,
+        'term_image_url'
+    );
+
+    $term_id = absint( $atts['term_id'] );
+
+    // If no term ID is explicitly passed, resolve it from the current WordPress context.
+    if ( empty( $term_id ) ) {
+        $queried_object = get_queried_object();
+        
+        // Ensure the queried object is a valid WP_Term instance.
+        if ( $queried_object instanceof WP_Term ) {
+            $term_id = $queried_object->term_id;
+        } 
     }
 
-    return $url;
+    // Bail early if the context resolution failed and we lack a valid term ID.
+    if ( empty( $term_id ) ) {
+        return '';
+    }
+
+    // Retrieve the attachment ID from the term meta structure.
+    $attachment_id = get_term_meta( $term_id, sanitize_key( $atts['meta_key'] ), true );
+
+    // Bail if no meta value is present.
+    if ( empty( $attachment_id ) ) {
+        return '';
+    }
+
+    // Retrieve the image URL based on the attachment ID and requested size parameters.
+    $image_url = wp_get_attachment_image_url( absint( $attachment_id ), sanitize_text_field( $atts['size'] ) );
+
+    // Return the sanitized URL, or an empty string if the attachment lookup fails.
+    return $image_url ? esc_url( $image_url ) : '';
 }
 
-// Intercept general dynamic URL outputs in GenerateBlocks
-add_filter( 'generateblocks_dynamic_url_output', 'dd_gb_parse_dynamic_url_shortcodes', 10, 2 );
-
-// Intercept specific dynamic image URLs in GenerateBlocks
-add_filter( 'generateblocks_image_url', 'dd_gb_parse_dynamic_url_shortcodes', 10, 2 );
+add_shortcode('term_image', 'term_image');
