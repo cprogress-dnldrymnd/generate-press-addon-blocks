@@ -1,6 +1,6 @@
 /**
  * Registers the 'dd/marquee' block for the Gutenberg Editor.
- * Enforces an InnerBlocks structure that accepts specific GenerateBlocks elements.
+ * Enforces an InnerBlocks structure that accepts core image/typography and GenerateBlocks image/headline blocks.
  */
 (function (wp) {
     const { registerBlockType } = wp.blocks;
@@ -13,29 +13,32 @@
         category: 'design',
         description: 'Add an infinitely scrolling row of logos or text.',
 
+        /**
+         * Renders the editor interface. 
+         * Styling is now handled via the registered editor_style block attribute.
+         */
         edit: function (props) {
+            // Retrieve default block properties without inline inline layout styles
             const blockProps = useBlockProps();
 
             return el('div', blockProps,
                 el(InnerBlocks, {
+                    // Added generateblocks/image and generateblocks/headline
                     allowedBlocks: [
                         'generateblocks/image',
-                        'generateblocks/headline'
+                        'generateblocks/text',
+                        'generateblocks/headline',
                     ],
-                    template: [
-                        ['generateblocks/image', {}]
-                    ],
-                    // Explicitly prevent WordPress from locking the template after the first block
-                    templateLock: false, 
                     orientation: 'horizontal',
-                    // Safely render the physical button appender so it survives the flex layout
-                    renderAppender: function() {
-                        return el( InnerBlocks.ButtonBlockAppender, null );
-                    }
+                    renderAppender: InnerBlocks.ButtonBlockAppender
                 })
             );
         },
 
+        /**
+         * Saves the structural layout of the InnerBlocks.
+         * The dynamic duplication and wrapper classes are handled via the PHP render_callback.
+         */
         save: function () {
             return el(InnerBlocks.Content, null);
         }
