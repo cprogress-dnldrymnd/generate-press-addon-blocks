@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if ( hasNavigation ) {
             swiperConfig.navigation = {
-                nextEl: carouselEl.querySelector('.swiper-button-next'),
-                prevEl: carouselEl.querySelector('.swiper-button-prev'),
+                nextEl: carouselEl.querySelector('.gb-carousel-control--next'),
+                prevEl: carouselEl.querySelector('.gb-carousel-control--previous'),
             };
         }
 
