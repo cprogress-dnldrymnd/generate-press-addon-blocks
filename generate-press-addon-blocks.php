@@ -185,6 +185,7 @@ function dd_render_marquee_block( $attributes, $content ) {
  */
 function term_image( $atts ) {
     // Parse attributes with strictly defined defaults
+    return 'test';
     $atts = shortcode_atts(
         array(
             'meta_key' => 'thumbnail_id',
