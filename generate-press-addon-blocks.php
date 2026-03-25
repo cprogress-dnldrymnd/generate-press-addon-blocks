@@ -170,3 +170,18 @@ function test() {
     return 'https://thinklaser.theprogressteam.com/wp-content/uploads/2026/03/stock-photo-laser-cutting-machine-in-industrial-factory-producing-precision-metal-parts-2643491785@2x-600x410.png';
 }   
 add_shortcode('test', 'test');
+
+/**
+ * Processes shortcodes within GenerateBlocks image URLs.
+ * * @param string $url The original URL.
+ * @param array $attributes The block attributes.
+ * @return string The filtered URL.
+ * @author Digitally Disruptive - Donald Raymundo
+ */
+add_filter( 'generateblocks_dynamic_url_output', function( $url, $attributes ) {
+    // Check if the URL contains a shortcode bracket
+    if ( strpos( $url, '[' ) !== false ) {
+        return do_shortcode( $url );
+    }
+    return $url;
+}, 10, 2 );
