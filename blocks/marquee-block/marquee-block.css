@@ -1,5 +1,5 @@
 /**
- * Unified frontend styling for the Marquee block.
+ * Unified frontend styling for the Logo Marquee block.
  * Handles hardware-accelerated infinite scrolling.
  */
 
@@ -25,14 +25,18 @@
     animation-play-state: paused;
 }
 
-.dd-marquee-track .wp-block-image {
+/* Core & GenerateBlocks Image Block Styling */
+.dd-marquee-track .wp-block-image,
+.dd-marquee-track .wp-block-generateblocks-image {
     margin: 0;
     display: flex;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .dd-marquee-item img,
-.dd-marquee-track .wp-block-image img {
+.dd-marquee-track .wp-block-image img,
+.dd-marquee-track .wp-block-generateblocks-image img {
     height: 35px;
     width: auto;
     max-width: none;
@@ -40,8 +44,10 @@
     display: block;
 }
 
+/* Core & GenerateBlocks Typography Styling */
 .dd-marquee-track .wp-block-paragraph,
-.dd-marquee-track .wp-block-heading {
+.dd-marquee-track .wp-block-heading,
+.dd-marquee-track .wp-block-generateblocks-headline {
     margin: 0;
     display: flex;
     align-items: center;
