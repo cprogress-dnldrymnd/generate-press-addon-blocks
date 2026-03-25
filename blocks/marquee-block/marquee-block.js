@@ -26,11 +26,8 @@
 
             return el('div', blockProps,
                 el(InnerBlocks, {
-                    // Added generateblocks/image, generateblocks/headline, and core text support
                     allowedBlocks: [
-                        'generateblocks/image',
-                        'generateblocks/headline',
-                        'core/paragraph' 
+                        'generateblocks/text',
                     ],
                     orientation: 'horizontal',
                     renderAppender: InnerBlocks.ButtonBlockAppender
