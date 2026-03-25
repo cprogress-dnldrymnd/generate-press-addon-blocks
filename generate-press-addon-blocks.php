@@ -172,16 +172,27 @@ function test() {
 add_shortcode('test', 'test');
 
 /**
- * Processes shortcodes within GenerateBlocks image URLs.
- * * @param string $url The original URL.
- * @param array $attributes The block attributes.
- * @return string The filtered URL.
- * @author Digitally Disruptive - Donald Raymundo
+ * Evaluates shortcodes within GenerateBlocks dynamic URLs.
+ * * Intercepts the raw URL string before it is rendered by the Block Editor 
+ * or frontend. If shortcode brackets are detected, it executes do_shortcode() 
+ * to ensure the actual URL payload is returned to the image src attribute.
+ *
+ * @param string $url        The dynamically retrieved URL string.
+ * @param array  $attributes The array of block attributes associated with the current block.
+ * @return string            The fully processed URL string.
  */
-add_filter( 'generateblocks_dynamic_url_output', function( $url, $attributes ) {
-    // Check if the URL contains a shortcode bracket
-    if ( strpos( $url, '[' ) !== false ) {
-        return do_shortcode( $url );
+function dd_gb_parse_dynamic_url_shortcodes( $url, $attributes ) {
+    // Verify the URL is not empty and contains structural shortcode brackets
+    if ( ! empty( $url ) && strpos( $url, '[' ) !== false && strpos( $url, ']' ) !== false ) {
+        // Execute the shortcode to extract the underlying URL
+        $url = do_shortcode( $url );
     }
+
     return $url;
-}, 10, 2 );
+}
+
+// Intercept general dynamic URL outputs in GenerateBlocks
+add_filter( 'generateblocks_dynamic_url_output', 'dd_gb_parse_dynamic_url_shortcodes', 10, 2 );
+
+// Intercept specific dynamic image URLs in GenerateBlocks
+add_filter( 'generateblocks_image_url', 'dd_gb_parse_dynamic_url_shortcodes', 10, 2 );
