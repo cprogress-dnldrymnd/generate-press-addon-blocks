@@ -19,7 +19,6 @@
             displayName: { type: 'boolean', default: true },
             displayDescription: { type: 'boolean', default: false },
             metaKey: { type: 'string', default: '' },
-            metaType: { type: 'string', default: 'text' },
             slidesPerView: { type: 'number', default: 3 },
             spaceBetween: { type: 'number', default: 20 },
             autoplay: { type: 'boolean', default: false },
@@ -67,19 +66,10 @@
                             onChange: ( val ) => setAttributes( { displayDescription: val } )
                         } ),
                         el( TextControl, {
-                            label: 'Term Meta Key (Optional)',
+                            label: 'Image Term Meta Key (Optional)',
                             value: attributes.metaKey,
                             onChange: ( val ) => setAttributes( { metaKey: val } ),
-                            help: 'Key of the custom field to retrieve.'
-                        } ),
-                        attributes.metaKey !== '' && el( SelectControl, {
-                            label: 'Meta Output Type',
-                            value: attributes.metaType,
-                            options: [
-                                { label: 'Plain Text', value: 'text' },
-                                { label: 'Image (Requires URL or ID)', value: 'image' }
-                            ],
-                            onChange: ( val ) => setAttributes( { metaType: val } )
+                            help: 'Key of the custom field to retrieve the image URL or Attachment ID.'
                         } )
                     ),
                     el( PanelBody, { title: 'Swiper Settings', initialOpen: false },

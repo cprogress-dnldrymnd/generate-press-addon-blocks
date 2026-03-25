@@ -112,8 +112,8 @@ add_action('init', 'dd_gp_register_addon_blocks');
 
 /**
  * Renders the frontend output for the Taxonomy Terms Carousel block.
- * Dynamically queries taxonomy terms, resolves associated meta fields, and constructs the DOM
- * structure required by Swiper.js. Passes configuration to JS via data attributes.
+ * Dynamically queries taxonomy terms, resolves associated meta fields strictly as images,
+ * and constructs the DOM structure required by Swiper.js.
  * * Applies default attributes fallback since Gutenberg JS defaults are not automatically 
  * injected into server-side callbacks unless explicitly saved in the editor.
  *
@@ -123,13 +123,11 @@ add_action('init', 'dd_gp_register_addon_blocks');
  */
 function dd_render_taxonomy_carousel_block($attributes, $content)
 {
-    // Enforce attribute defaults to prevent rendering failures when editor values remain untouched.
     $defaults = array(
         'taxonomy'           => 'category',
         'displayName'        => true,
         'displayDescription' => false,
         'metaKey'            => '',
-        'metaType'           => 'text',
         'slidesPerView'      => 3,
         'spaceBetween'       => 20,
         'autoplay'           => false,
@@ -150,7 +148,6 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
         return '<p>No terms found for taxonomy: ' . esc_html($taxonomy) . '</p>';
     }
 
-    // Build the container attributes, injecting Swiper configuration via data sets
     $wrapper_attributes = get_block_wrapper_attributes(array(
         'class'                => 'dd-taxonomy-carousel swiper',
         'data-slides-per-view' => esc_attr($attributes['slidesPerView']),
@@ -163,65 +160,49 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
 
     ob_start();
 ?>
-    <div class="swiper-holder">
-        <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
-                ?>>
-            <div class="swiper-wrapper">
-                <?php foreach ($terms as $term) : ?>
-                    <div class="swiper-slide dd-term-slide">
-                        <div class="dd-term-content">
+    <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+            ?>>
+        <div class="swiper-wrapper">
+            <?php foreach ($terms as $term) : ?>
+                <div class="swiper-slide dd-term-slide">
+                    <div class="dd-term-content">
 
-                            <?php
-                            // Process and render term meta if configured
-                            if (! empty($attributes['metaKey'])) {
-                                $meta_value = get_term_meta($term->term_id, $attributes['metaKey'], true);
-                                if ($meta_value) {
-                                    if ($attributes['metaType'] === 'image') {
-                                        // Handle image output resolving numeric attachment IDs to URLs
-                                        $img_src = is_numeric($meta_value) ? wp_get_attachment_url((int) $meta_value) : $meta_value;
-                                        if ($img_src) {
-                                            echo '<div class="dd-term-meta-image"><img src="' . esc_url($img_src) . '" alt="' . esc_attr($term->name) . '" /></div>';
-                                        }
-                                    } else {
-                                        echo '<div class="dd-term-meta-text">' . esc_html($meta_value) . '</div>';
-                                    }
+                        <?php
+                        // Process and render term meta strictly as an image
+                        if (! empty($attributes['metaKey'])) {
+                            $meta_value = get_term_meta($term->term_id, $attributes['metaKey'], true);
+
+                            if ($meta_value) {
+                                // Resolves numeric attachment IDs to URLs or accepts direct URLs
+                                $img_src = is_numeric($meta_value) ? wp_get_attachment_url((int) $meta_value) : $meta_value;
+
+                                if ($img_src) {
+                                    echo '<div class="dd-term-meta-image"><img src="' . esc_url($img_src) . '" alt="' . esc_attr($term->name) . '" /></div>';
                                 }
                             }
-                            ?>
+                        }
+                        ?>
 
-                            <?php if ($attributes['displayName']) : ?>
-                                <h3 class="dd-term-name"><a href="<?php echo esc_url(get_term_link($term)); ?>"><?php echo esc_html($term->name); ?></a></h3>
-                            <?php endif; ?>
+                        <?php if ($attributes['displayName']) : ?>
+                            <h3 class="dd-term-name"><a href="<?php echo esc_url(get_term_link($term)); ?>"><?php echo esc_html($term->name); ?></a></h3>
+                        <?php endif; ?>
 
-                            <?php if ($attributes['displayDescription'] && ! empty($term->description)) : ?>
-                                <div class="dd-term-description"><?php echo wp_kses_post(wpautop($term->description)); ?></div>
-                            <?php endif; ?>
+                        <?php if ($attributes['displayDescription'] && ! empty($term->description)) : ?>
+                            <div class="dd-term-description"><?php echo wp_kses_post(wpautop($term->description)); ?></div>
+                        <?php endif; ?>
 
-                        </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
-
-            <?php if ($attributes['pagination']) : ?>
-                <div class="swiper-pagination"></div>
-            <?php endif; ?>
-
+                </div>
+            <?php endforeach; ?>
         </div>
+
+        <?php if ($attributes['pagination']) : ?>
+            <div class="swiper-pagination"></div>
+        <?php endif; ?>
+
         <?php if ($attributes['navigation']) : ?>
-            <button class="gb-carousel-control gbp-carousel-controls gbp-carousel-controls__button gbp-carousel--control__previous gb-carousel-control--previous">
-                <span class="gb-carousel-control-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
-                        <path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path>
-                    </svg>
-                </span>
-            </button>
-            <button aria-label="Next slide" class="gb-carousel-control gbp-carousel-controls gbp-carousel-controls__button gbp-carousel--control__next gb-carousel-control--next">
-                <span class="gb-carousel-control-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
-                        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
-                    </svg>
-                </span>
-            </button>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
         <?php endif; ?>
     </div>
 <?php
