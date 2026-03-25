@@ -37,17 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const getOrCreateDialog = () => {
         let dialog = document.getElementById('dd-global-media-lightbox');
-        
+
         if (!dialog) {
             dialog = document.createElement('dialog');
             dialog.id = 'dd-global-media-lightbox';
             dialog.className = 'dd-media-lightbox-modal';
-            
+
             const closeBtn = document.createElement('button');
             closeBtn.className = 'dd-lightbox-close';
             closeBtn.innerHTML = '&times;';
             closeBtn.setAttribute('aria-label', 'Close media');
-            
+
             const contentWrapper = document.createElement('div');
             contentWrapper.className = 'dd-lightbox-content-wrapper';
 
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const closeLightbox = () => {
                 // Apply the CSS class that triggers the exit animation keyframes
                 dialog.classList.add('dd-lightbox-closing');
-                
+
                 // Wait for the animation to finish before destroying content and closing native dialog
                 dialog.addEventListener('animationend', function handleAnimationEnd() {
                     dialog.classList.remove('dd-lightbox-closing');
@@ -84,8 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     triggers.forEach(container => {
         container.addEventListener('click', (e) => {
-            // Prevent click if user is clicking an internal anchor link
-            if (e.target.tagName.toLowerCase() === 'a') return; 
+            if (e.target.tagName.toLowerCase() === 'a') return;
 
             const url = container.getAttribute('data-lightbox-url');
             if (!url) return;
@@ -93,36 +92,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const dialog = getOrCreateDialog();
             const wrapper = dialog.querySelector('.dd-lightbox-content-wrapper');
             const mediaType = getMediaType(url);
-            
-            wrapper.innerHTML = ''; // Reset
+
+            wrapper.innerHTML = '';
 
             if (mediaType === 'image') {
                 const img = document.createElement('img');
                 img.src = url;
                 wrapper.appendChild(img);
-            } 
+            }
             else if (mediaType === 'video') {
                 const video = document.createElement('video');
                 video.src = url;
                 video.controls = true;
                 video.autoplay = true;
                 wrapper.appendChild(video);
-            } 
+            }
             else if (mediaType === 'youtube' || mediaType === 'vimeo') {
                 const iframe = document.createElement('iframe');
                 iframe.src = mediaType === 'youtube' ? getYouTubeEmbedUrl(url) : url;
                 iframe.frameBorder = '0';
                 iframe.allow = 'autoplay; fullscreen; picture-in-picture';
                 iframe.setAttribute('allowfullscreen', '');
-                
-                // Add a responsive wrapper for the 16:9 aspect ratio
+
                 const ratioWrapper = document.createElement('div');
                 ratioWrapper.className = 'dd-responsive-iframe-wrapper';
+
+                /**
+                 * Smooth Loading Logic:
+                 * Listen for the iframe load event to toggle the visibility class.
+                 */
+                iframe.onload = () => {
+                    ratioWrapper.classList.add('is-loaded');
+                };
+
                 ratioWrapper.appendChild(iframe);
                 wrapper.appendChild(ratioWrapper);
             }
 
-            // Native HTML5 dialog method to open with backdrop
             dialog.showModal();
         });
     });

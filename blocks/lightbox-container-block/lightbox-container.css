@@ -154,3 +154,59 @@
     margin-left: 4px; /* Optically centers the asymmetrical play triangle */
     transition: transform 0.2s ease;
 }
+
+/**
+ * Loading Spinner and Iframe Transitions
+ */
+
+/* The wrapper acts as the loading container */
+.dd-responsive-iframe-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    background: #000; /* Background color while loading */
+    overflow: hidden;
+}
+
+/* Spinner element */
+.dd-responsive-iframe-wrapper::before {
+    content: "";
+    position: absolute;
+    top: calc(50% - 20px);
+    left: calc(50% - 20px);
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: dd-spinner-rotate 0.8s linear infinite;
+    z-index: 1;
+}
+
+/* Hide spinner once loaded */
+.dd-responsive-iframe-wrapper.is-loaded::before {
+    display: none;
+}
+
+.dd-responsive-iframe-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    opacity: 0; /* Start hidden */
+    transition: opacity 0.4s ease-in-out;
+    z-index: 2;
+}
+
+/* Reveal iframe with a fade */
+.dd-responsive-iframe-wrapper.is-loaded iframe {
+    opacity: 1;
+}
+
+@keyframes dd-spinner-rotate {
+    to { transform: rotate(360deg); }
+}
