@@ -165,32 +165,3 @@ function dd_render_marquee_block( $attributes, $content ) {
     <?php
     return ob_get_clean();
 }
-
-/**
- * Registers the [dd_logo_marquee] shortcode for backward compatibility.
- *
- * @param array $atts Shortcode attributes.
- * @return string HTML output for the marquee.
- */
-function dd_render_logo_marquee_shortcode( $atts ) {
-    $atts = shortcode_atts( array( 'ids' => '' ), $atts, 'dd_logo_marquee' );
-    if ( empty( $atts['ids'] ) ) return '';
-    wp_enqueue_style( 'dd-logo-marquee-style' );
-    $ids = array_map( 'trim', explode( ',', $atts['ids'] ) );
-    $images_html = '';
-    foreach ( $ids as $id ) {
-        $img = wp_get_attachment_image( $id, 'full', false );
-        if ( $img ) $images_html .= '<div class="dd-marquee-item">' . $img . '</div>';
-    }
-    $track_content = $images_html . $images_html;
-    ob_start();
-    ?>
-    <div class="dd-marquee-container">
-        <div class="dd-marquee-track">
-            <?php echo $track_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-        </div>
-    </div>
-    <?php
-    return ob_get_clean();
-}
-add_shortcode( 'dd_logo_marquee', 'dd_render_logo_marquee_shortcode' );
