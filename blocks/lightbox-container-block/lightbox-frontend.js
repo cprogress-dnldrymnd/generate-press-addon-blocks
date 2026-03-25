@@ -37,17 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const getOrCreateDialog = () => {
         let dialog = document.getElementById('dd-global-media-lightbox');
-        
+
         if (!dialog) {
             dialog = document.createElement('dialog');
             dialog.id = 'dd-global-media-lightbox';
             dialog.className = 'dd-media-lightbox-modal';
-            
+
             const closeBtn = document.createElement('button');
             closeBtn.className = 'dd-lightbox-close';
             closeBtn.innerHTML = '&times;';
             closeBtn.setAttribute('aria-label', 'Close media');
-            
+
             const contentWrapper = document.createElement('div');
             contentWrapper.className = 'dd-lightbox-content-wrapper';
 
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         link.as = 'image';
                         link.href = url;
                         document.head.appendChild(link);
-                    } 
+                    }
                     else if (mediaType === 'video') {
                         // Create an invisible video node to reliably force Chromium to cache the file
                         const hiddenVideo = document.createElement('video');
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         hiddenVideo.style.height = '0';
                         hiddenVideo.style.opacity = '0';
                         document.body.appendChild(hiddenVideo);
-                    } 
+                    }
                     else if (mediaType === 'youtube') {
                         ['https://www.youtube.com', 'https://i.ytimg.com'].forEach(domain => {
                             const link = document.createElement('link');
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             link.href = domain;
                             document.head.appendChild(link);
                         });
-                    } 
+                    }
                     else if (mediaType === 'vimeo') {
                         ['https://player.vimeo.com', 'https://vimeo.com'].forEach(domain => {
                             const link = document.createElement('link');
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         container.addEventListener('click', (e) => {
-            if (e.target.tagName.toLowerCase() === 'a') return; 
+            if (e.target.tagName.toLowerCase() === 'a') return;
 
             const url = container.getAttribute('data-lightbox-url');
             if (!url) return;
@@ -147,28 +147,51 @@ document.addEventListener('DOMContentLoaded', () => {
             const dialog = getOrCreateDialog();
             const wrapper = dialog.querySelector('.dd-lightbox-content-wrapper');
             const mediaType = getMediaType(url);
-            
-            wrapper.innerHTML = ''; 
+
+            // Reset wrapper state and inject loader
+            wrapper.innerHTML = '';
+            wrapper.classList.remove('dd-media-loaded');
+
+            const loader = document.createElement('div');
+            loader.className = 'dd-lightbox-loader';
+            wrapper.appendChild(loader);
+
+            /**
+             * Handles the successful buffering/loading of media.
+             * Triggers the CSS fade-in and cleans up the loader DOM node.
+             */
+            const handleMediaLoad = () => {
+                wrapper.classList.add('dd-media-loaded');
+                setTimeout(() => {
+                    if (wrapper.contains(loader)) loader.remove();
+                }, 400); // Wait for the 0.4s CSS transition to finish
+            };
 
             if (mediaType === 'image') {
                 const img = document.createElement('img');
+                img.onload = handleMediaLoad;
                 img.src = url;
                 wrapper.appendChild(img);
-            } 
+            }
             else if (mediaType === 'video') {
                 const video = document.createElement('video');
+                // 'canplay' fires when enough data is buffered to begin playing
+                video.addEventListener('canplay', handleMediaLoad, { once: true });
+                // Fallback for strict browsers that delay 'canplay'
+                video.addEventListener('loadedmetadata', handleMediaLoad, { once: true });
                 video.src = url;
                 video.controls = true;
                 video.autoplay = true;
                 wrapper.appendChild(video);
-            } 
+            }
             else if (mediaType === 'youtube' || mediaType === 'vimeo') {
                 const iframe = document.createElement('iframe');
+                iframe.onload = handleMediaLoad; // Fires when iframe document is complete
                 iframe.src = mediaType === 'youtube' ? getYouTubeEmbedUrl(url) : url;
                 iframe.frameBorder = '0';
                 iframe.allow = 'autoplay; fullscreen; picture-in-picture';
                 iframe.setAttribute('allowfullscreen', '');
-                
+
                 const ratioWrapper = document.createElement('div');
                 ratioWrapper.className = 'dd-responsive-iframe-wrapper';
                 ratioWrapper.appendChild(iframe);

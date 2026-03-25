@@ -154,3 +154,41 @@
     margin-left: 4px; /* Optically centers the asymmetrical play triangle */
     transition: transform 0.2s ease;
 }
+
+/* --- Loading Animation & Media States --- */
+.dd-lightbox-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: dd-spin 1s linear infinite;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+@keyframes dd-spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Hide media initially to allow the loader to show clearly */
+.dd-lightbox-content-wrapper img,
+.dd-lightbox-content-wrapper video,
+.dd-responsive-iframe-wrapper {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 2;
+    position: relative;
+}
+
+/* Fade in media once the JS detects it has buffered */
+.dd-lightbox-content-wrapper.dd-media-loaded img,
+.dd-lightbox-content-wrapper.dd-media-loaded video,
+.dd-lightbox-content-wrapper.dd-media-loaded .dd-responsive-iframe-wrapper {
+    opacity: 1;
+}
