@@ -28,6 +28,8 @@
                         'core/image',
                         'core/paragraph',
                         'core/heading',
+                        'generateblocks/image',
+                        'generateblocks/headline'
                     ],
                     orientation: 'horizontal',
                     renderAppender: InnerBlocks.ButtonBlockAppender
