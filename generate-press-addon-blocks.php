@@ -58,7 +58,7 @@ class DD_GP_Woo_Customizer
         add_action('init', array($this, 'register_blocks'));
 
         // WooCommerce Customization Hooks
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_woo_styles'), 99);
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_woo_styles'), 999);
         add_action('woocommerce_before_main_content', array($this, 'add_woo_wrapper_open'), 5);
         add_action('woocommerce_after_main_content', array($this, 'add_woo_wrapper_close'), 50);
     }
