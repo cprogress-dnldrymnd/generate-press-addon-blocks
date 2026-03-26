@@ -161,8 +161,10 @@ function dd_render_breadcrumbs_block( $attributes, $content ) {
                         <a href="<?php echo esc_url( $archive_url ); ?>">
                             <?php echo esc_html( $plural_label ); ?>
                         </a>
+                        <span class="sep">&#x276F;</span>
                     <?php else : ?>
                         <span><?php echo esc_html( $plural_label ); ?></span>
+                        <span class="sep">&#x276F;</span>
                     <?php endif; ?>
                 </li>
             <?php endif; ?>

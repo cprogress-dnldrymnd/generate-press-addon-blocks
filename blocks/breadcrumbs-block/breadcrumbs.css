@@ -8,10 +8,11 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 0.35rem;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     list-style: none;
     margin: 0;
     padding: 0;
+    font-weight: 500;
 }
 
 .dd-breadcrumbs__item {
@@ -20,18 +21,6 @@
     gap: 0.35rem;
 }
 
-/* Separator arrow between crumbs */
-.dd-breadcrumbs__item + .dd-breadcrumbs__item::before {
-    content: '';
-    display: inline-block;
-    width: 0;
-    height: 0;
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
-    border-left: 5px solid currentColor;
-    opacity: 0.45;
-    flex-shrink: 0;
-}
 
 .dd-breadcrumbs__item a {
     color: inherit;
@@ -42,15 +31,6 @@
 .dd-breadcrumbs__item a:hover {
     opacity: 0.7;
     text-decoration: underline;
-}
-
-/* Post-type crumb: pill/highlight treatment matching the screenshot's encircled style */
-.dd-breadcrumbs__item--post-type a,
-.dd-breadcrumbs__item--post-type span {
-    border: 1.5px solid currentColor;
-    border-radius: 999px;
-    padding: 0.1em 0.65em;
-    font-weight: 500;
 }
 
 /* Current page crumb — not a link, slightly muted */
