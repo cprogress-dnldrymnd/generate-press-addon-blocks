@@ -19,7 +19,7 @@
     border-radius: 10px;
     overflow: hidden;
 }
-.woocommerce div.product div.images .flex-control-thumbs li {
+.woocommerce div.product div.images .flex-control-thumbs li img{
     border-radius: 10px;
     background-color: var(--base-3);
     overflow: hidden;
