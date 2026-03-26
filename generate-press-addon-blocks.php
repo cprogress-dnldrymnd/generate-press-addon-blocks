@@ -48,6 +48,12 @@ function dd_gp_register_addon_blocks()
             'style_deps'        => array('swiper-css'),
             'view_script_deps'  => array('swiper-js'),
         ),
+        'breadcrumbs' => array(
+            'script_file'       => 'blocks/breadcrumbs-block/breadcrumbs.js',
+            'style_file'        => 'blocks/breadcrumbs-block/breadcrumbs.css',
+            'editor_style_file' => 'blocks/breadcrumbs-block/breadcrumbs-editor.css',
+            'render_callback'   => 'dd_render_breadcrumbs_block',
+        ),
     );
 
     foreach ($blocks as $slug => $config) {
@@ -93,6 +99,85 @@ function dd_gp_register_addon_blocks()
     }
 }
 add_action('init', 'dd_gp_register_addon_blocks');
+
+/**
+ * Renders the frontend output for the Dynamic Breadcrumbs block.
+ *
+ * Outputs a breadcrumb trail in the form:
+ *   Home > [Post Type Plural Label] > [Current Post Title]
+ *
+ * The middle crumb is resolved dynamically from the current post's registered
+ * post type object, using its `labels->name` (the plural label, e.g. "Laser Systems").
+ * If the post type has a public archive, the middle crumb links to it.
+ *
+ * @param array  $attributes Block attributes from the editor.
+ * @param string $content    Unused — this block has no InnerBlocks.
+ * @return string HTML output for the breadcrumb trail.
+ */
+function dd_render_breadcrumbs_block( $attributes, $content ) {
+    $defaults = array(
+        'showHome'      => true,
+        'showPostType'  => true,
+        'linkPostType'  => true,
+    );
+    $attributes = wp_parse_args( $attributes, $defaults );
+
+    $post_id   = get_the_ID();
+    $post_type = get_post_type( $post_id );
+
+    if ( ! $post_id || ! $post_type ) {
+        return '';
+    }
+
+    $post_type_obj    = get_post_type_object( $post_type );
+    $plural_label     = $post_type_obj ? $post_type_obj->labels->name : '';
+    $archive_url      = get_post_type_archive_link( $post_type );
+    $current_title    = get_the_title( $post_id );
+
+    $wrapper_attributes = get_block_wrapper_attributes( array(
+        'class' => 'dd-breadcrumbs',
+        'aria-label' => 'Breadcrumb',
+    ) );
+
+    ob_start();
+    ?>
+    <nav <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+        <ol class="dd-breadcrumbs" role="list">
+
+            <?php if ( $attributes['showHome'] ) : ?>
+                <li class="dd-breadcrumbs__item dd-breadcrumbs__item--home">
+                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>">
+                        <?php esc_html_e( 'Home', 'dd-gp-addon-blocks' ); ?>
+                    </a>
+                </li>
+            <?php endif; ?>
+
+            <?php if ( $attributes['showPostType'] && ! empty( $plural_label ) ) :
+                // Only link if the post type has a public archive and the option is enabled
+                $has_archive_link = $attributes['linkPostType'] && ! empty( $archive_url );
+            ?>
+                <li class="dd-breadcrumbs__item dd-breadcrumbs__item--post-type">
+                    <?php if ( $has_archive_link ) : ?>
+                        <a href="<?php echo esc_url( $archive_url ); ?>">
+                            <?php echo esc_html( $plural_label ); ?>
+                        </a>
+                    <?php else : ?>
+                        <span><?php echo esc_html( $plural_label ); ?></span>
+                    <?php endif; ?>
+                </li>
+            <?php endif; ?>
+
+            <?php if ( ! empty( $current_title ) ) : ?>
+                <li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">
+                    <?php echo esc_html( $current_title ); ?>
+                </li>
+            <?php endif; ?>
+
+        </ol>
+    </nav>
+    <?php
+    return ob_get_clean();
+}
 
 /**
  * Renders the frontend output for the Taxonomy Terms Carousel block.

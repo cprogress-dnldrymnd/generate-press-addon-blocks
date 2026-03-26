@@ -1,0 +1,19 @@
+/**
+ * Editor-only styles for the Dynamic Breadcrumbs block.
+ */
+
+.dd-breadcrumbs-editor {
+    border: 2px dashed #007cba;
+    padding: 12px 16px;
+    background-color: #f3f9fd;
+    border-radius: 4px;
+}
+
+.dd-editor-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #007cba;
+    font-size: 14px;
+}
