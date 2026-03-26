@@ -1,3 +1,6 @@
 .single-product{
     background-color: #EBEBEB;
 }
+.single-product.single-product .inside-article {
+    background-color: transparent;
+}
