@@ -1,6 +1,10 @@
 .single-product{
     background-color: #EBEBEB;
 }
-.single-product.single-product .inside-article {
+.single-product .inside-article {
     background-color: transparent;
+}
+
+.woocommerce div.product .product_title {
+    font-size: 2.25rem;
 }
