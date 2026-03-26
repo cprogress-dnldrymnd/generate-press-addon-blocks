@@ -1,12 +1,11 @@
 <?php
-
 /**
- * Plugin Name: GeneratePress Add-on Blocks
- * Description: A scalable collection of custom, performance-optimized Gutenberg blocks and extensions for GeneratePress.
- * Version: 2.0.1
+ * Plugin Name: DD GeneratePress & WooCommerce Customizer
+ * Description: A scalable collection of custom Gutenberg blocks and advanced WooCommerce structural customizations optimized for GeneratePress.
+ * Version: 2.1.0
  * Author: Digitally Disruptive - Donald Raymundo
  * Author URI: https://digitallydisruptive.co.uk/
- * Text Domain: dd-gp-addon-blocks
+ * Text Domain: dd-gp-woo-customizer
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,11 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Main core class for handling GeneratePress Add-on Blocks.
- * * Implements a Singleton pattern to initialize block registration 
+ * Main core class for handling GeneratePress Add-on Blocks and WooCommerce Customizations.
+ * * Implements a Singleton pattern to initialize block registration, WooCommerce hooks,
  * and encapsulate rendering methods.
  */
-class DD_GP_Addon_Blocks {
+class DD_GP_Woo_Customizer {
 
     /**
      * Plugin version identifier for script/style cache busting.
@@ -30,14 +29,14 @@ class DD_GP_Addon_Blocks {
     /**
      * The single instance of the class.
      *
-     * @var DD_GP_Addon_Blocks|null
+     * @var DD_GP_Woo_Customizer|null
      */
     private static $instance = null;
 
     /**
      * Retrieves the singleton instance of the class.
      *
-     * @return DD_GP_Addon_Blocks
+     * @return DD_GP_Woo_Customizer
      */
     public static function get_instance() {
         if ( null === self::$instance ) {
@@ -48,10 +47,56 @@ class DD_GP_Addon_Blocks {
 
     /**
      * Constructor.
-     * * Initializes the WordPress hooks required for the plugin.
+     * * Initializes the WordPress hooks required for the plugin's blocks and WooCommerce structural modifications.
      */
     private function __construct() {
+        // Gutenberg Block Hooks
         add_action( 'init', array( $this, 'register_blocks' ) );
+
+        // WooCommerce Customization Hooks
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_woo_styles' ) );
+        add_action( 'woocommerce_before_main_content', array( $this, 'add_woo_wrapper_open' ), 5 );
+        add_action( 'woocommerce_after_main_content', array( $this, 'add_woo_wrapper_close' ), 50 );
+    }
+
+    /**
+     * Enqueue the plugin's custom WooCommerce stylesheet.
+     * * Conditionally loads the CSS asset solely on WooCommerce-related pages 
+     * to preserve strict frontend performance standards.
+     *
+     * @return void
+     */
+    public function enqueue_woo_styles() {
+        if ( function_exists( 'is_woocommerce' ) && is_woocommerce() ) {
+            wp_enqueue_style(
+                'dd-woo-customizer-css',
+                plugins_url( 'assets/css/dd-woo-customizer.css', __FILE__ ),
+                array(),
+                self::VERSION,
+                'all'
+            );
+        }
+    }
+
+    /**
+     * Output a custom opening HTML `<div>` wrapper before the main WooCommerce content.
+     * * Useful for overriding or complementing GeneratePress container layouts 
+     * without modifying theme files directly.
+     *
+     * @return void
+     */
+    public function add_woo_wrapper_open() {
+        echo '<div class="dd-woo-custom-container">';
+    }
+
+    /**
+     * Output a custom closing HTML `</div>` wrapper after the main WooCommerce content.
+     * * Closes the structural container initiated by `add_woo_wrapper_open()`.
+     *
+     * @return void
+     */
+    public function add_woo_wrapper_close() {
+        echo '</div>';
     }
 
     /**
@@ -185,7 +230,7 @@ class DD_GP_Addon_Blocks {
                 <?php if ( $attributes['showHome'] ) : ?>
                     <li class="dd-breadcrumbs__item dd-breadcrumbs__item--home">
                         <a href="<?php echo esc_url( home_url( '/' ) ); ?>">
-                            <?php esc_html_e( 'Home', 'dd-gp-addon-blocks' ); ?>
+                            <?php esc_html_e( 'Home', 'dd-gp-woo-customizer' ); ?>
                         </a>
                         <span class="sep">&#x276F;</span>
                     </li>
@@ -421,4 +466,4 @@ class DD_GP_Addon_Blocks {
 }
 
 // Initialize the core plugin class.
-DD_GP_Addon_Blocks::get_instance();
+DD_GP_Woo_Customizer::get_instance();
