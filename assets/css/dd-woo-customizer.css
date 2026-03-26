@@ -1,5 +1,5 @@
-.single-product{
-    background-color: #EBEBEB;
+.single-product {
+    background-color: #ebebeb;
 }
 .single-product .inside-article {
     background-color: transparent;
@@ -13,4 +13,14 @@
 .woocommerce div.product div.images img {
     aspect-ratio: 4/3;
     object-fit: cover;
+}
+.woocommerce-product-gallery .flex-viewport {
+    background-color: var(--base-3);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.woocommerce div.product div.images .flex-control-thumbs li {
+    border-radius: 10px;
+    background-color: var(--base-3);
+    overflow: hidden;
 }
