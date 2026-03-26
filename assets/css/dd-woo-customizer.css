@@ -9,3 +9,8 @@
     font-size: 2.25rem;
     margin-bottom: 0.75rem;
 }
+
+.woocommerce div.product div.images img {
+    aspect-ratio: 4/3;
+    object-fit: cover;
+}
