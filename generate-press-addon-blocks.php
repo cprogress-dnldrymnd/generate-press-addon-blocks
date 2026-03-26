@@ -114,70 +114,73 @@ add_action('init', 'dd_gp_register_addon_blocks');
  * @param string $content    Unused — this block has no InnerBlocks.
  * @return string HTML output for the breadcrumb trail.
  */
-function dd_render_breadcrumbs_block( $attributes, $content ) {
+function dd_render_breadcrumbs_block($attributes, $content)
+{
     $defaults = array(
         'showHome'      => true,
         'showPostType'  => true,
         'linkPostType'  => true,
     );
-    $attributes = wp_parse_args( $attributes, $defaults );
+    $attributes = wp_parse_args($attributes, $defaults);
 
     $post_id   = get_the_ID();
-    $post_type = get_post_type( $post_id );
+    $post_type = get_post_type($post_id);
 
-    if ( ! $post_id || ! $post_type ) {
+    if (! $post_id || ! $post_type) {
         return '';
     }
 
-    $post_type_obj    = get_post_type_object( $post_type );
+    $post_type_obj    = get_post_type_object($post_type);
     $plural_label     = $post_type_obj ? $post_type_obj->labels->name : '';
-    $archive_url      = get_post_type_archive_link( $post_type );
-    $current_title    = get_the_title( $post_id );
+    $archive_url      = get_post_type_archive_link($post_type);
+    $current_title    = get_the_title($post_id);
 
-    $wrapper_attributes = get_block_wrapper_attributes( array(
+    $wrapper_attributes = get_block_wrapper_attributes(array(
         'class' => 'dd-breadcrumbs',
         'aria-label' => 'Breadcrumb',
-    ) );
+    ));
 
     ob_start();
-    ?>
-    <nav <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+?>
+    <nav <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+            ?>>
         <ol class="dd-breadcrumbs" role="list">
 
-            <?php if ( $attributes['showHome'] ) : ?>
+            <?php if ($attributes['showHome']) : ?>
                 <li class="dd-breadcrumbs__item dd-breadcrumbs__item--home">
-                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>">
-                        <?php esc_html_e( 'Home', 'dd-gp-addon-blocks' ); ?>
+                    <a href="<?php echo esc_url(home_url('/')); ?>">
+                        <?php esc_html_e('Home', 'dd-gp-addon-blocks'); ?>
                     </a>
+                    <span class="sep">&#x276F;</span>
                 </li>
             <?php endif; ?>
 
-            <?php if ( $attributes['showPostType'] && ! empty( $plural_label ) ) :
+            <?php if ($attributes['showPostType'] && ! empty($plural_label)) :
                 // Only link if the post type has a public archive and the option is enabled
-                $has_archive_link = $attributes['linkPostType'] && ! empty( $archive_url );
+                $has_archive_link = $attributes['linkPostType'] && ! empty($archive_url);
             ?>
                 <li class="dd-breadcrumbs__item dd-breadcrumbs__item--post-type">
-                    <?php if ( $has_archive_link ) : ?>
-                        <a href="<?php echo esc_url( $archive_url ); ?>">
-                            <?php echo esc_html( $plural_label ); ?>
+                    <?php if ($has_archive_link) : ?>
+                        <a href="<?php echo esc_url($archive_url); ?>">
+                            <?php echo esc_html($plural_label); ?>
                         </a>
                         <span class="sep">&#x276F;</span>
                     <?php else : ?>
-                        <span><?php echo esc_html( $plural_label ); ?></span>
+                        <span><?php echo esc_html($plural_label); ?></span>
                         <span class="sep">&#x276F;</span>
                     <?php endif; ?>
                 </li>
             <?php endif; ?>
 
-            <?php if ( ! empty( $current_title ) ) : ?>
+            <?php if (! empty($current_title)) : ?>
                 <li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">
-                    <?php echo esc_html( $current_title ); ?>
+                    <?php echo esc_html($current_title); ?>
                 </li>
             <?php endif; ?>
 
         </ol>
     </nav>
-    <?php
+<?php
     return ob_get_clean();
 }
 
@@ -222,7 +225,7 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
 
     $terms = get_terms(array(
         'taxonomy'   => $taxonomy,
-        'hide_empty' => ! $attributes['showEmpty'], 
+        'hide_empty' => ! $attributes['showEmpty'],
         'exclude'    => $exclude_ids,
     ));
 
@@ -245,7 +248,8 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
     ob_start();
 ?>
     <div class="swiper-holder">
-        <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+        <div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped 
+                ?>>
             <div class="swiper-wrapper">
                 <?php foreach ($terms as $term) : ?>
                     <div class="swiper-slide dd-term-slide">
@@ -284,7 +288,7 @@ function dd_render_taxonomy_carousel_block($attributes, $content)
                 <div class="swiper-pagination"></div>
             <?php endif; ?>
         </div>
-        
+
         <?php if ($attributes['navigation']) : ?>
             <button class="gb-carousel-control gbp-carousel-controls gbp-carousel-controls__button gbp-carousel--control__previous gb-carousel-control--previous">
                 <span class="gb-carousel-control-icon">
