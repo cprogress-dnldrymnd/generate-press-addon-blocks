@@ -98,7 +98,7 @@ class DD_GP_Addon_Blocks
                 'editor_style_file' => 'blocks/breadcrumbs-block/breadcrumbs-editor.css',
                 'render_callback'   => array($this, 'render_breadcrumbs_block'),
             ),
-            'title-block' => array(
+            'title--block' => array(
                 'script_file'       => 'blocks/title-block/title-block.js',
                 'style_file'        => 'blocks/title-block/title-block.css',
                 'render_callback'   => array($this, 'render_title_block'),
