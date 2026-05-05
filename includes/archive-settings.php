@@ -84,3 +84,15 @@ function dd_render_archive_settings_page() {
     </div>
     <?php
 }
+
+/**
+ * Completely remove the default GeneratePress loop from the DOM on archives.
+ * Ideal when replacing the entire content area with a custom block hook.
+ */
+add_filter( 'generate_has_default_loop', 'dd_remove_default_archive_loop' );
+function dd_remove_default_archive_loop( $has_loop ) {
+    if ( is_archive() || is_home() ) {
+        return false; // Tells GP to skip rendering the primary content loop
+    }
+    return $has_loop;
+}
