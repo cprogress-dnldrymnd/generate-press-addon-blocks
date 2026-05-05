@@ -98,10 +98,6 @@ class DD_GP_Addon_Blocks
                 'editor_style_file' => 'blocks/breadcrumbs-block/breadcrumbs-editor.css',
                 'render_callback'   => array($this, 'render_breadcrumbs_block'),
             ),
-            'title-block' => array(
-                'script_file'       => 'blocks/title-block/title-block.js',
-                'render_callback'   => array($this, 'render_title_block'),
-            ),
         );
 
         foreach ($blocks as $slug => $config) {
@@ -502,54 +498,3 @@ class DD_GP_Addon_Blocks
 
 // Initialize the core plugin class.
 DD_GP_Addon_Blocks::get_instance();
-
-
-/**
- * Registers custom dynamic tags for the GenerateBlocks UI.
- *
- * Hooks into the 'init' action to ensure GenerateBlocks core classes 
- * are fully instantiated before attempting registration.
- *
- * @since 1.0.0
- * @return void
- */
-function dd_register_gb_custom_dynamic_tags() {
-	// Verify the core GenerateBlocks registration class exists to prevent fatal errors.
-	if ( ! class_exists( 'GenerateBlocks_Register_Dynamic_Tag' ) ) {
-		return;
-	}
-
-	// Instantiate a new dynamic tag.
-	new GenerateBlocks_Register_Dynamic_Tag( [
-		'title'    => __( 'Custom Example Tag', 'dd-gb-custom-tag' ), // The name appearing in the UI dropdown
-		'tag'      => 'dd_custom_example_tag',                        // Unique internal identifier
-		'type'     => 'post',                                         // UI Grouping (e.g., 'post', 'author', 'elements')
-		'supports' => [ 'source' ],                                   // Enables core standard block supports
-		'return'   => 'dd_custom_tag_callback',                       // The defined callback function below
-	] );
-}
-add_action( 'init', 'dd_register_gb_custom_dynamic_tags' );
-
-/**
- * Callback function to handle the output rendering for the custom dynamic tag.
- *
- * @since 1.0.0
- * @param array  $options  The configuration options passed from the block settings.
- * @param object $block    The block object instance.
- * @param object $instance The block instance data.
- * @return string The processed dynamic data ready for frontend output.
- */
-function dd_custom_tag_callback( $options, $block, $instance ) {
-	// 1. Execute your custom logic here (e.g., database queries, complex ACF extractions, external APIs).
-	$output = 'Processed Custom Dynamic Output'; 
-
-	// 2. Wrap the final output using GenerateBlocks' built-in helper method.
-	// This ensures that native block features like "Truncate Content", "Replace", 
-	// or "Trim" configured by the user in the block UI still function correctly.
-	if ( class_exists( 'GenerateBlocks_Dynamic_Tag_Callbacks' ) ) {
-		return GenerateBlocks_Dynamic_Tag_Callbacks::output( $output, $options, $instance );
-	}
-
-	// Fallback if the helper class is unavailable
-	return $output; 
-}
