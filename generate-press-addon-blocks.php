@@ -17,7 +17,7 @@ if (! defined('ABSPATH')) {
  * Load External Modules
  * Require the GenerateBlocks dynamic tags integration file.
  */
-require_once plugin_dir_path( __FILE__ ) . 'includes/gb-dynamic-tags.php';
+require_once plugin_dir_path(__FILE__) . 'includes/gb-dynamic-tags.php';
 
 /**
  * Main core class for handling GeneratePress Add-on Blocks.
@@ -61,7 +61,15 @@ class DD_GP_Addon_Blocks
     private function __construct()
     {
         add_action('init', array($this, 'register_blocks'));
+        add_action('get_the_archive_title_prefix', '__return_empty_string');
     }
+
+    /**
+     * Remove standard WordPress archive title prefixes.
+     * Strips "Archives:", "Category:", "Tag:", etc., globally from get_the_archive_title().
+     * 
+     * @link https://developer.wordpress.org/reference/hooks/get_the_archive_title_prefix/
+     */
 
     /**
      * Centralized block registry for Generate Press Add-on Blocks.
