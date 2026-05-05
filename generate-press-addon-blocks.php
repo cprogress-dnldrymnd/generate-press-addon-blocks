@@ -14,6 +14,12 @@ if (! defined('ABSPATH')) {
 }
 
 /**
+ * Load External Modules
+ * Require the GenerateBlocks dynamic tags integration file.
+ */
+require_once plugin_dir_path( __FILE__ ) . 'includes/gb-dynamic-tags.php';
+
+/**
  * Main core class for handling GeneratePress Add-on Blocks.
  * * Implements a Singleton pattern to initialize block registration 
  * and encapsulate rendering methods.
