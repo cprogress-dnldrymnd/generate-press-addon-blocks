@@ -18,7 +18,7 @@
      * context-aware block powered by a PHP render_callback.
      */
     registerBlockType( 'dd/title-block', {
-        title: 'DD Dynamic Title',
+        title: 'Dynamic Title',
         icon: 'heading',
         category: 'theme',
         description: 'Dynamically displays the current post, page, or archive title based on routing context.',
