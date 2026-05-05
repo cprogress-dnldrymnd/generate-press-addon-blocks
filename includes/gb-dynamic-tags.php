@@ -26,7 +26,6 @@ function dd_register_gb_dynamic_tags() {
         'title'    => __( 'Archive/Post Title', 'dd-gp-addon-blocks' ), // The human-readable name shown in the selector UI.
         'tag'      => 'dd_archive_post_title',                          // The internal tag identifier.
         'type'     => 'site',                                           // Groups the tag in the interface.
-        'supports' => [ 'source', 'link' ],                             // Enables "Source" and "Link To" options in the UI modal.
         'return'   => 'dd_gb_dynamic_archive_post_title_callback',      // The PHP callback that generates the output.
     ] );
 }
