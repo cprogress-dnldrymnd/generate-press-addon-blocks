@@ -94,6 +94,10 @@ class DD_GP_Addon_Blocks {
                 'editor_style_file' => 'blocks/breadcrumbs-block/breadcrumbs-editor.css',
                 'render_callback'   => array( $this, 'render_breadcrumbs_block' ),
             ),
+            'title-block' => array(
+                'script_file'       => 'blocks/title-block/title-block.js',
+                'style_file'        => 'blocks/title-block/title-block.css',
+            ),
         );
 
         foreach ( $blocks as $slug => $config ) {
@@ -142,11 +146,9 @@ class DD_GP_Addon_Blocks {
     /**
      * Renders the frontend output for the Dynamic Breadcrumbs block.
      *
-     * Outputs a breadcrumb trail in the form:
-     * Home > [Post Type Plural Label] > [Current Post Title]
-     *
-     * The middle crumb is resolved dynamically from the current post's registered
-     * post type object, using its `labels->name`.
+     * Processes WordPress conditional contexts to generate a trail:
+     * Home > [Archive/Post Type Label] > [Current Item].
+     * Specifically overrides the default blog archive label to output "News".
      *
      * @param array  $attributes Block attributes from the editor.
      * @param string $content    Unused — this block has no InnerBlocks.
@@ -159,18 +161,6 @@ class DD_GP_Addon_Blocks {
             'linkPostType' => true,
         );
         $attributes = wp_parse_args( $attributes, $defaults );
-
-        $post_id   = get_the_ID();
-        $post_type = get_post_type( $post_id );
-
-        if ( ! $post_id || ! $post_type ) {
-            return '';
-        }
-
-        $post_type_obj  = get_post_type_object( $post_type );
-        $plural_label   = $post_type_obj ? $post_type_obj->labels->name : '';
-        $archive_url    = get_post_type_archive_link( $post_type );
-        $current_title  = get_the_title( $post_id );
 
         $wrapper_attributes = get_block_wrapper_attributes( array(
             'class'      => 'dd-breadcrumbs',
@@ -191,28 +181,47 @@ class DD_GP_Addon_Blocks {
                     </li>
                 <?php endif; ?>
 
-                <?php if ( $attributes['showPostType'] && ! empty( $plural_label ) ) :
-                    // Only link if the post type has a public archive and the option is enabled
-                    $has_archive_link = $attributes['linkPostType'] && ! empty( $archive_url );
-                ?>
-                    <li class="dd-breadcrumbs__item dd-breadcrumbs__item--post-type">
-                        <?php if ( $has_archive_link ) : ?>
-                            <a href="<?php echo esc_url( $archive_url ); ?>">
-                                <?php echo esc_html( $plural_label ); ?>
-                            </a>
-                            <span class="sep">&#x276F;</span>
-                        <?php else : ?>
-                            <span><?php echo esc_html( $plural_label ); ?></span>
-                            <span class="sep">&#x276F;</span>
-                        <?php endif; ?>
-                    </li>
-                <?php endif; ?>
+                <?php
+                if ( is_home() ) {
+                    // Explictly intercept the posts archive to inject "News"
+                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html__( 'News', 'dd-gp-addon-blocks' ) . '</li>';
+                } elseif ( is_archive() ) {
+                    // Generic Archives
+                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . wp_kses_post( get_the_archive_title() ) . '</li>';
+                } elseif ( is_singular() ) {
+                    // Singular Item Context
+                    $post_id   = get_the_ID();
+                    $post_type = get_post_type( $post_id );
+                    $post_type_obj  = get_post_type_object( $post_type );
+                    $plural_label   = $post_type_obj ? $post_type_obj->labels->name : '';
+                    $archive_url    = get_post_type_archive_link( $post_type );
+                    
+                    // Override label if resolving single posts
+                    if ( 'post' === $post_type ) {
+                        $plural_label = __( 'News', 'dd-gp-addon-blocks' );
+                        $archive_url  = get_permalink( get_option( 'page_for_posts' ) );
+                    }
 
-                <?php if ( ! empty( $current_title ) ) : ?>
-                    <li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">
-                        <?php echo esc_html( $current_title ); ?>
-                    </li>
-                <?php endif; ?>
+                    if ( $attributes['showPostType'] && ! empty( $plural_label ) && ! is_page() ) {
+                        $has_archive_link = $attributes['linkPostType'] && ! empty( $archive_url );
+                        echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--post-type">';
+                        
+                        if ( $has_archive_link ) {
+                            echo '<a href="' . esc_url( $archive_url ) . '">' . esc_html( $plural_label ) . '</a>';
+                        } else {
+                            echo '<span>' . esc_html( $plural_label ) . '</span>';
+                        }
+                        
+                        echo '<span class="sep">&#x276F;</span></li>';
+                    }
+                    
+                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html( get_the_title( $post_id ) ) . '</li>';
+                } elseif ( is_search() ) {
+                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html__( 'Search Results', 'dd-gp-addon-blocks' ) . '</li>';
+                } elseif ( is_404() ) {
+                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html__( '404 Not Found', 'dd-gp-addon-blocks' ) . '</li>';
+                }
+                ?>
 
             </ol>
         </nav>

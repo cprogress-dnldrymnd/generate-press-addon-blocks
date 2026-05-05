@@ -9,6 +9,7 @@
     const { InspectorControls, useBlockProps } = wp.blockEditor;
     const { PanelBody, ToggleControl } = wp.components;
     const { createElement: el } = wp.element;
+    const ServerSideRender = wp.serverSideRender; // Hook into SSR API
 
     registerBlockType( 'dd/breadcrumbs', {
         title: 'Dynamic Breadcrumbs',
@@ -32,7 +33,7 @@
 
         /**
          * Renders the editor preview.
-         * This is a fully server-rendered block — the editor shows a labelled placeholder.
+         * Replaces the static placeholder with a live, server-side rendered payload.
          *
          * @param {Object} props Block properties and attributes.
          * @return {Object} The rendered React element.
@@ -65,10 +66,11 @@
                     )
                 ),
                 el( 'div', blockProps,
-                    el( 'div', { className: 'dd-editor-placeholder' },
-                        el( 'span', { className: 'dashicons dashicons-admin-links' } ),
-                        ' Dynamic Breadcrumbs — Home > [Post Type] > [Current Page]'
-                    )
+                    // Executes dynamic PHP render logic asynchronously inside the editor canvas
+                    el( ServerSideRender, {
+                        block: 'dd/breadcrumbs',
+                        attributes: attributes
+                    } )
                 )
             );
         },
