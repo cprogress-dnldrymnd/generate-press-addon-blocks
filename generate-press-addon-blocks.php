@@ -17,6 +17,7 @@ if (! defined('ABSPATH')) {
  * Load External Modules
  */
 require_once plugin_dir_path(__FILE__) . 'includes/gb-dynamic-tags.php';
+require_once plugin_dir_path(__FILE__) . 'includes/gb-taxonomy-filters.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/archive-settings.php';
 /**
  * Main core class for handling GeneratePress Add-on Blocks.
