@@ -524,6 +524,7 @@ function dd_register_gb_custom_dynamic_tags() {
 		'title'    => __( 'Custom Example Tag', 'dd-gb-custom-tag' ), // The name appearing in the UI dropdown
 		'tag'      => 'dd_custom_example_tag',                        // Unique internal identifier
 		'type'     => 'post',                                         // UI Grouping (e.g., 'post', 'author', 'elements')
+		'supports' => [ 'source' ],                                   // Enables core standard block supports
 		'return'   => 'dd_custom_tag_callback',                       // The defined callback function below
 	] );
 }
