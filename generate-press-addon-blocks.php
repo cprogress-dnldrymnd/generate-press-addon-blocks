@@ -98,10 +98,6 @@ class DD_GP_Addon_Blocks
                 'editor_style_file' => 'blocks/breadcrumbs-block/breadcrumbs-editor.css',
                 'render_callback'   => array($this, 'render_breadcrumbs_block'),
             ),
-            'title-block' => array(
-                'script_file'       => 'blocks/title-block/title-block.js',
-                'render_callback'   => array($this, 'render_title_block'),
-            ),
         );
 
         foreach ($blocks as $slug => $config) {
@@ -523,8 +519,7 @@ function dd_register_gb_custom_dynamic_tags() {
 	new GenerateBlocks_Register_Dynamic_Tag( [
 		'title'    => __( 'Custom Example Tag', 'dd-gb-custom-tag' ), // The name appearing in the UI dropdown
 		'tag'      => 'dd_custom_example_tag',                        // Unique internal identifier
-		'type'     => 'post',                                         // UI Grouping (e.g., 'post', 'author', 'elements')
-		'supports' => [ 'source' ],                                   // Enables core standard block supports
+		'type'     => 'site',                                         // UI Grouping (e.g., 'post', 'author', 'elements')
 		'return'   => 'dd_custom_tag_callback',                       // The defined callback function below
 	] );
 }
