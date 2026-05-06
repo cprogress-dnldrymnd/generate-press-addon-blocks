@@ -17,9 +17,7 @@ if (! defined('ABSPATH')) {
  * Load External Modules
  */
 require_once plugin_dir_path(__FILE__) . 'includes/gb-dynamic-tags.php';
-require_once plugin_dir_path(__FILE__) . 'includes/gb-taxonomy-filters.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/archive-settings.php';
-
 /**
  * Main core class for handling GeneratePress Add-on Blocks.
  * * Implements a Singleton pattern to initialize block registration 
@@ -58,15 +56,11 @@ class DD_GP_Addon_Blocks
     /**
      * Constructor.
      * * Initializes the WordPress hooks required for the plugin.
-     * * Registers the custom query modifier for the GenerateBlocks Query Loop.
      */
     private function __construct()
     {
         add_action('init', array($this, 'register_blocks'));
         add_action('get_the_archive_title_prefix', '__return_empty_string');
-        
-        // Hook into GenerateBlocks Query Loop to apply the taxonomy filter arguments
-        add_filter('generateblocks_query_loop_args', array($this, 'apply_taxonomy_filter_to_gp_query'), 10, 2);
     }
 
     /**
@@ -117,12 +111,6 @@ class DD_GP_Addon_Blocks
                 'editor_style_file' => 'blocks/breadcrumbs-block/breadcrumbs-editor.css',
                 'render_callback'   => array($this, 'render_breadcrumbs_block'),
             ),
-            'query-taxonomy-filter' => array(
-                'script_file'       => 'blocks/query-taxonomy-filter/query-taxonomy-filter.js',
-                'style_file'        => 'blocks/query-taxonomy-filter/query-taxonomy-filter.css',
-                'editor_style_file' => 'blocks/query-taxonomy-filter/query-taxonomy-filter-editor.css',
-                'render_callback'   => array($this, 'render_query_taxonomy_filter_block'),
-            ),
         );
 
         foreach ($blocks as $slug => $config) {
@@ -166,100 +154,6 @@ class DD_GP_Addon_Blocks
 
             register_block_type("dd/{$slug}", $block_args);
         }
-    }
-
-    /**
-     * Intercepts and modifies the GenerateBlocks Query Loop arguments based on URL parameters.
-     * Evaluates `filter_tax` and `filter_term` GET parameters mapped by the taxonomy filter block
-     * and securely injects them into the standard WP_Query structure used by GB.
-     *
-     * @param array $query_args The executed arguments passed to WP_Query.
-     * @param array $attributes The block attributes belonging to the GenerateBlocks query.
-     * @return array Modified query arguments executing the targeted taxonomy filtering.
-     */
-    public function apply_taxonomy_filter_to_gp_query($query_args, $attributes)
-    {
-        if (isset($_GET['filter_tax']) && isset($_GET['filter_term'])) {
-            $tax  = sanitize_text_field(wp_unslash($_GET['filter_tax']));
-            $term = sanitize_text_field(wp_unslash($_GET['filter_term']));
-
-            if (taxonomy_exists($tax)) {
-                // Ensure a tax_query structure exists
-                if (empty($query_args['tax_query'])) {
-                    $query_args['tax_query'] = array('relation' => 'AND');
-                }
-
-                $query_args['tax_query'][] = array(
-                    'taxonomy' => $tax,
-                    'field'    => 'slug',
-                    'terms'    => $term,
-                );
-            }
-        }
-
-        return $query_args;
-    }
-
-    /**
-     * Renders the frontend output for the Query Taxonomy Filter block.
-     * Constructs an architectural link-list that appends specific taxonomy and 
-     * term variables onto the current page URL for query parameter consumption.
-     *
-     * @param array  $attributes Configured block properties (taxonomy, showEmpty).
-     * @param string $content    Unused — block outputs dynamic DOM structure.
-     * @return string Output HTML containing the taxonomy filter navigation.
-     */
-    public function render_query_taxonomy_filter_block($attributes, $content)
-    {
-        $defaults = array(
-            'taxonomy'  => 'category',
-            'showEmpty' => false,
-        );
-        $attributes = wp_parse_args($attributes, $defaults);
-        $taxonomy   = sanitize_text_field($attributes['taxonomy']);
-
-        $terms = get_terms(array(
-            'taxonomy'   => $taxonomy,
-            'hide_empty' => ! $attributes['showEmpty'],
-        ));
-
-        if (is_wp_error($terms) || empty($terms)) {
-            return '<div class="dd-query-taxonomy-filter"><p>' . esc_html__('No filter terms available.', 'dd-gp-addon-blocks') . '</p></div>';
-        }
-
-        $wrapper_attributes = get_block_wrapper_attributes(array(
-            'class' => 'dd-query-taxonomy-filter',
-        ));
-
-        // Detect active term filtering
-        $current_term = isset($_GET['filter_term']) ? sanitize_text_field(wp_unslash($_GET['filter_term'])) : '';
-        $current_tax  = isset($_GET['filter_tax']) ? sanitize_text_field(wp_unslash($_GET['filter_tax'])) : '';
-
-        ob_start();
-        ?>
-        <nav <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-            <ul class="dd-filter-list" style="display: flex; gap: 15px; list-style: none; padding: 0;">
-                <li class="dd-filter-item <?php echo (empty($current_term) || $current_tax !== $taxonomy) ? 'is-active' : ''; ?>">
-                    <a href="<?php echo esc_url(remove_query_arg(array('filter_tax', 'filter_term'))); ?>">
-                        <?php esc_html_e('All', 'dd-gp-addon-blocks'); ?>
-                    </a>
-                </li>
-                <?php foreach ($terms as $term) : ?>
-                    <?php 
-                    $is_active  = ($current_term === $term->slug && $current_tax === $taxonomy);
-                    $filter_url = add_query_arg(array(
-                        'filter_tax'  => $taxonomy,
-                        'filter_term' => $term->slug,
-                    ));
-                    ?>
-                    <li class="dd-filter-item <?php echo $is_active ? 'is-active' : ''; ?>">
-                        <a href="<?php echo esc_url($filter_url); ?>"><?php echo esc_html($term->name); ?></a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </nav>
-        <?php
-        return ob_get_clean();
     }
 
     /**
@@ -617,3 +511,76 @@ class DD_GP_Addon_Blocks
 
 // Initialize the core plugin class.
 DD_GP_Addon_Blocks::get_instance();
+
+/**
+ * Inserts the Synced Pattern (wp_block custom post type) into the database on plugin activation.
+ * 
+ * This function handles the programmatic creation of a globally synced block 
+ * while defining specific "metadata" bindings that expose the Heading, Paragraph, 
+ * and Image to the "Content" sidebar for instance-level overrides.
+ *
+ * @since 1.0.0
+ * @return void
+ */
+function dd_insert_synced_pattern_on_activation() {
+	$pattern_title = 'samedaystore : Image and Text Two Column';
+
+	// Query to check if the synced pattern already exists to prevent duplication on re-activation.
+	$existing_pattern = get_posts( array(
+		'post_type'              => 'wp_block',
+		'title'                  => $pattern_title,
+		'post_status'            => 'publish',
+		'numberposts'            => 1,
+		'no_found_rows'          => true,
+		'ignore_sticky_posts'    => true,
+		'update_post_term_cache' => false,
+		'update_post_meta_cache' => false,
+	) );
+
+	if ( empty( $existing_pattern ) ) {
+		
+		/**
+		 * The Block Markup defining the columns, inner blocks, and their specific override bindings.
+		 * Notice the `metadata` object within the block comments:
+		 * - `name`: Labels the field in the sidebar (e.g., "H2").
+		 * - `bindings`: Maps attributes (content, url, id, alt) to the `core/pattern-overrides` source.
+		 */
+		$pattern_content = '
+		<!-- wp:columns {"align":"wide"} -->
+		<div class="wp-block-columns alignwide">
+			<!-- wp:column {"verticalAlignment":"center"} -->
+			<div class="wp-block-column is-vertically-aligned-center">
+				<!-- wp:heading {"metadata":{"name":"H2 We\'ve worked with over 25 ecommerce brands","bindings":{"content":{"source":"core/pattern-overrides"}}}} -->
+				<h2 class="wp-block-heading">We’ve worked with over 25 ecommerce brands, each with different goals, challenges, and starting points.</h2>
+				<!-- /wp:heading -->
+
+				<!-- wp:paragraph {"metadata":{"name":"Paragraph","bindings":{"content":{"source":"core/pattern-overrides"}}}} -->
+				<p>Some came to us at the beginning, looking to set things up properly. Others already had strong stores but needed help improving performance. The work varies, but the focus stays the same building systems that drive consistent sales.</p>
+				<!-- /wp:paragraph -->
+			</div>
+			<!-- /wp:column -->
+
+			<!-- wp:column -->
+			<div class="wp-block-column">
+				<!-- wp:image {"id":1,"sizeSlug":"large","linkDestination":"none","metadata":{"name":"Image","bindings":{"url":{"source":"core/pattern-overrides"},"id":{"source":"core/pattern-overrides"},"alt":{"source":"core/pattern-overrides"}}}} -->
+				<figure class="wp-block-image size-large"><img src="' . esc_url( admin_url( 'images/wordpress-logo.svg' ) ) . '" alt=""/></figure>
+				<!-- /wp:image -->
+			</div>
+			<!-- /wp:column -->
+		</div>
+		<!-- /wp:columns -->
+		';
+
+		$post_data = array(
+			'post_title'   => $pattern_title,
+			'post_content' => $pattern_content,
+			'post_status'  => 'publish',
+			'post_type'    => 'wp_block',
+		);
+
+		wp_insert_post( $post_data );
+	}
+}
+
+// Hook the insertion logic to the plugin activation process.
+register_activation_hook( __FILE__, 'dd_insert_synced_pattern_on_activation' );
