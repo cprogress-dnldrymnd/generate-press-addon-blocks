@@ -110,6 +110,11 @@ class DD_GP_Addon_Blocks
                 'style_file'        => 'blocks/breadcrumbs-block/breadcrumbs.css',
                 'editor_style_file' => 'blocks/breadcrumbs-block/breadcrumbs-editor.css',
                 'render_callback'   => array($this, 'render_breadcrumbs_block'),
+                'attributes'        => array(
+                    'showHome'     => array('type' => 'boolean', 'default' => true),
+                    'showPostType' => array('type' => 'boolean', 'default' => true),
+                    'linkPostType' => array('type' => 'boolean', 'default' => true),
+                ),
             ),
         );
 
@@ -150,6 +155,12 @@ class DD_GP_Addon_Blocks
             // Assign PHP Render Callback if defined
             if (! empty($config['render_callback'])) {
                 $block_args['render_callback'] = $config['render_callback'];
+            }
+
+            // Declare block attributes so the REST block-renderer (used by
+            // ServerSideRender in the editor) accepts them during validation.
+            if (! empty($config['attributes'])) {
+                $block_args['attributes'] = $config['attributes'];
             }
 
             register_block_type("dd/{$slug}", $block_args);
