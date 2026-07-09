@@ -9,7 +9,6 @@
     const { InspectorControls, useBlockProps } = wp.blockEditor;
     const { PanelBody, ToggleControl } = wp.components;
     const { createElement: el } = wp.element;
-    const ServerSideRender = wp.serverSideRender; // Hook into SSR API
 
     registerBlockType( 'dd/breadcrumbs', {
         title: 'Dynamic Breadcrumbs',
@@ -42,6 +41,39 @@
             const { attributes, setAttributes } = props;
             const blockProps = useBlockProps( { className: 'dd-breadcrumbs-editor' } );
 
+            // Build a representative preview trail. The live front-end output
+            // depends on the visitor's query context (is_singular, is_archive,
+            // etc.), which does not exist inside the editor — so we mimic a
+            // typical "Home › Post Type › Current Page" trail here instead.
+            const sep = el( 'span', { className: 'sep' }, '❯' );
+            const crumbs = [];
+
+            if ( attributes.showHome ) {
+                crumbs.push(
+                    el( 'li', { className: 'dd-breadcrumbs__item dd-breadcrumbs__item--home', key: 'home' },
+                        el( 'a', { href: '#' }, 'Home' ),
+                        sep
+                    )
+                );
+            }
+
+            if ( attributes.showPostType ) {
+                crumbs.push(
+                    el( 'li', { className: 'dd-breadcrumbs__item dd-breadcrumbs__item--post-type', key: 'post-type' },
+                        attributes.linkPostType
+                            ? el( 'a', { href: '#' }, 'Post Type' )
+                            : el( 'span', null, 'Post Type' ),
+                        sep
+                    )
+                );
+            }
+
+            crumbs.push(
+                el( 'li', { className: 'dd-breadcrumbs__item dd-breadcrumbs__item--current', 'aria-current': 'page', key: 'current' },
+                    'Current Page'
+                )
+            );
+
             return el( wp.element.Fragment, null,
                 el( InspectorControls, null,
                     el( PanelBody, { title: 'Breadcrumb Settings', initialOpen: true },
@@ -66,11 +98,7 @@
                     )
                 ),
                 el( 'div', blockProps,
-                    // Executes dynamic PHP render logic asynchronously inside the editor canvas
-                    el( ServerSideRender, {
-                        block: 'dd/breadcrumbs',
-                        attributes: attributes
-                    } )
+                    el( 'ol', { className: 'dd-breadcrumbs', role: 'list' }, crumbs )
                 )
             );
         },
