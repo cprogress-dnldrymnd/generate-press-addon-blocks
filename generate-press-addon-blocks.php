@@ -211,6 +211,28 @@ class DD_GP_Addon_Blocks
                 if (is_home()) {
                     // Explictly intercept the posts archive to inject "News"
                     echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html__('News', 'dd-gp-addon-blocks') . '</li>';
+                } elseif (function_exists('is_product_category') && (is_product_category() || is_product_tag())) {
+                    // WooCommerce product taxonomy: Home > Shop > Term Name
+                    $shop_id  = function_exists('wc_get_page_id') ? wc_get_page_id('shop') : 0;
+                    $shop_url = $shop_id ? get_permalink($shop_id) : '';
+
+                    if ($attributes['showPostType'] && ! empty($shop_url)) {
+                        echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--post-type">';
+                        $shop_label = get_the_title($shop_id);
+                        if (empty($shop_label)) {
+                            $shop_label = __('Shop', 'dd-gp-addon-blocks');
+                        }
+
+                        if ($attributes['linkPostType']) {
+                            echo '<a href="' . esc_url($shop_url) . '">' . esc_html($shop_label) . '</a>';
+                        } else {
+                            echo '<span>' . esc_html($shop_label) . '</span>';
+                        }
+
+                        echo '<span class="sep">&#x276F;</span></li>';
+                    }
+
+                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html(single_term_title('', false)) . '</li>';
                 } elseif (is_archive()) {
                     // Generic Archives
                     echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . wp_kses_post(get_the_archive_title()) . '</li>';
