@@ -212,27 +212,28 @@ class DD_GP_Addon_Blocks
                     // Explictly intercept the posts archive to inject "News"
                     echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html__('News', 'dd-gp-addon-blocks') . '</li>';
                 } elseif (function_exists('is_product_category') && (is_product_category() || is_product_tag())) {
-                    // WooCommerce product taxonomy: Home > Shop > Term Name
-                    $shop_id  = function_exists('wc_get_page_id') ? wc_get_page_id('shop') : 0;
-                    $shop_url = $shop_id ? get_permalink($shop_id) : '';
+                    // WooCommerce product taxonomy: Home > Shop > [parent terms] > Term
+                    $this->render_shop_crumb($attributes);
 
-                    if ($attributes['showPostType'] && ! empty($shop_url)) {
-                        echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--post-type">';
-                        $shop_label = get_the_title($shop_id);
-                        if (empty($shop_label)) {
-                            $shop_label = __('Shop', 'dd-gp-addon-blocks');
-                        }
+                    // Link each ancestor term (e.g. parent category) up the chain.
+                    $this->render_term_ancestor_crumbs(get_queried_object());
 
-                        if ($attributes['linkPostType']) {
-                            echo '<a href="' . esc_url($shop_url) . '">' . esc_html($shop_label) . '</a>';
-                        } else {
-                            echo '<span>' . esc_html($shop_label) . '</span>';
-                        }
+                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html(single_term_title('', false)) . '</li>';
+                } elseif (is_singular('product')) {
+                    // WooCommerce product: Home > Shop > [category chain] > Product
+                    $post_id = get_the_ID();
+                    $this->render_shop_crumb($attributes);
 
+                    $primary_cat = $this->get_primary_product_cat($post_id);
+                    if ($primary_cat) {
+                        // Ancestors of the primary category, then the category itself.
+                        $this->render_term_ancestor_crumbs($primary_cat);
+                        echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--category">';
+                        echo '<a href="' . esc_url(get_term_link($primary_cat)) . '">' . esc_html($primary_cat->name) . '</a>';
                         echo '<span class="sep">&#x276F;</span></li>';
                     }
 
-                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html(single_term_title('', false)) . '</li>';
+                    echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . esc_html(get_the_title($post_id)) . '</li>';
                 } elseif (is_archive()) {
                     // Generic Archives
                     echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--current" aria-current="page">' . wp_kses_post(get_the_archive_title()) . '</li>';
@@ -275,6 +276,120 @@ class DD_GP_Addon_Blocks
         </nav>
     <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Outputs the "Shop" crumb (linking to the WooCommerce shop page).
+     *
+     * Shared by the product taxonomy and single product contexts. Honors the
+     * showPostType / linkPostType attributes. Safely no-ops if WooCommerce or a
+     * configured shop page is unavailable.
+     *
+     * @param array $attributes Parsed block attributes.
+     * @return void
+     */
+    private function render_shop_crumb($attributes)
+    {
+        if (empty($attributes['showPostType'])) {
+            return;
+        }
+
+        $shop_id  = function_exists('wc_get_page_id') ? wc_get_page_id('shop') : 0;
+        $shop_url = $shop_id ? get_permalink($shop_id) : '';
+        if (empty($shop_url)) {
+            return;
+        }
+
+        $shop_label = get_the_title($shop_id);
+        if (empty($shop_label)) {
+            $shop_label = __('Shop', 'dd-gp-addon-blocks');
+        }
+
+        echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--post-type">';
+        if (! empty($attributes['linkPostType'])) {
+            echo '<a href="' . esc_url($shop_url) . '">' . esc_html($shop_label) . '</a>';
+        } else {
+            echo '<span>' . esc_html($shop_label) . '</span>';
+        }
+        echo '<span class="sep">&#x276F;</span></li>';
+    }
+
+    /**
+     * Outputs a linked crumb for each ancestor of the given term (top-down).
+     *
+     * Used to surface parent categories when viewing a subcategory or a product
+     * nested in a subcategory. The term itself is not output — the caller
+     * decides how to render it (as the current crumb or a linked crumb).
+     *
+     * @param WP_Term|mixed $term The term whose ancestors should be rendered.
+     * @return void
+     */
+    private function render_term_ancestor_crumbs($term)
+    {
+        if (! $term instanceof WP_Term || empty($term->term_id)) {
+            return;
+        }
+        if (! is_taxonomy_hierarchical($term->taxonomy)) {
+            return;
+        }
+
+        // get_ancestors() returns nearest-first; reverse for top-down order.
+        $ancestors = array_reverse(get_ancestors($term->term_id, $term->taxonomy));
+        foreach ($ancestors as $ancestor_id) {
+            $ancestor = get_term($ancestor_id, $term->taxonomy);
+            if (! $ancestor instanceof WP_Term) {
+                continue;
+            }
+
+            $ancestor_url = get_term_link($ancestor);
+            echo '<li class="dd-breadcrumbs__item dd-breadcrumbs__item--category">';
+            if (! is_wp_error($ancestor_url)) {
+                echo '<a href="' . esc_url($ancestor_url) . '">' . esc_html($ancestor->name) . '</a>';
+            } else {
+                echo '<span>' . esc_html($ancestor->name) . '</span>';
+            }
+            echo '<span class="sep">&#x276F;</span></li>';
+        }
+    }
+
+    /**
+     * Resolves the most relevant product category for a product breadcrumb.
+     *
+     * Prefers the Rank Math primary category when set; otherwise falls back to
+     * the deepest assigned category so the fullest hierarchy is shown.
+     *
+     * @param int $post_id Product post ID.
+     * @return WP_Term|null The chosen category term, or null if none.
+     */
+    private function get_primary_product_cat($post_id)
+    {
+        $terms = get_the_terms($post_id, 'product_cat');
+        if (empty($terms) || is_wp_error($terms)) {
+            return null;
+        }
+
+        // Honor a Rank Math primary category if one is configured.
+        $primary_id = (int) get_post_meta($post_id, 'rank_math_primary_product_cat', true);
+        if ($primary_id) {
+            foreach ($terms as $term) {
+                if ((int) $term->term_id === $primary_id) {
+                    return $term;
+                }
+            }
+        }
+
+        // Otherwise pick the deepest term so the full ancestor chain shows.
+        $best       = null;
+        $best_depth = -1;
+        foreach ($terms as $term) {
+            $depth = count(get_ancestors($term->term_id, 'product_cat'));
+            if ($depth > $best_depth) {
+                $best_depth = $depth;
+                $best       = $term;
+            }
+        }
+
+        return $best;
     }
 
     /**
